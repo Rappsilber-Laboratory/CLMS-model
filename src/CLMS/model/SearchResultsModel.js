@@ -1034,7 +1034,7 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
                 return [link.matches_pp.length];
             },
             id: "MatchCount",
-            label: "Cross-Link Match Count",
+            label: "Crosslink Match Count",
             decimalPlaces: 0
         },
         {
@@ -1052,6 +1052,24 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             label: "Match Score",
             decimalPlaces: 2,
             matchLevel: true
+        },
+        {
+            linkFunc: function(link) {
+                var scores = link.filteredMatches_pp.map(function(m) {
+                    return m.match.score();
+                });
+                return [Math.max.apply(Math, scores)];
+            },
+            unfilteredLinkFunc: function(link) {
+                var scores = link.matches_pp.map(function(m) {
+                    return m.match.score();
+                })
+                return [Math.max.apply(Math, scores)];
+            },
+            id: "Highest Score",
+            label: "Highest Match Score per Crosslink",
+            decimalPlaces: 2,
+            matchLevel: false
         },
         {
             linkFunc: function(link) {
@@ -1213,7 +1231,7 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
                 return link.isLinearLink() ? [] : [link.getMeta("distance")];
             },
             id: "Distance",
-            label: "Cross-Link Cα-Cα Distance (Å)",
+            label: "Crosslink Cα-Cα Distance (Å)",
             decimalPlaces: 2,
             maxVal: 90,
         },

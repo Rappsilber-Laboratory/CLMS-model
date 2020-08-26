@@ -220,8 +220,13 @@ if (count($_GET) > 0) {
                 pg_free_result($modResult);
 
                 //cross-linkers
-                $crosslinkerQuery = "SELECT * FROM chosen_crosslinker cc INNER JOIN crosslinker cl ON cc.crosslinker_id = cl.id
-                 WHERE cc.paramset_id = '".$psId."';";
+                //  $crosslinkerQuery = "SELECT * FROM chosen_crosslinker cc INNER JOIN crosslinker cl ON cc.crosslinker_id = cl.id
+                //  WHERE cc.paramset_id = '".$psId."';";
+
+                //lutz...
+                //https://github.com/Rappsilber-Laboratory/xi3-issue-tracker/issues/473#issuecomment-658401738
+                $crosslinkerQuery = "SELECT regexp_replace(d,'\s*(.*)','\\1','i') AS description, regexp_replace(d,'.*[;:]ID:\s*([0-9]*).*','\\1','i')::int AS id, regexp_replace(d,'.*[;:]mass:\s*([+-]?[0-9.]*).*','\\1','i') AS mass, regexp_replace(d,'.*[;:]name:\s*([^;]*).*','\\1','i') AS name, d ~* '.*[;:]decoy.*' as is_decoy, false as is_default   FROM (SELECT  unnest(regexp_split_to_array(customsettings,E'\n','i')) AS d FROM parameter_set WHERE id = ".$psId.") c WHERE c.d ~* '\s*crosslinker:.*' UNION SELECT description as d, cl.id, mass, name, is_decoy, is_default FROM chosen_crosslinker cc INNER JOIN crosslinker cl ON cc.crosslinker_id = cl.id WHERE cc.paramset_id = ".$psId.";";
+
                 $crosslinkerResult = pg_query($dbconn, $crosslinkerQuery)
                             or die('Query failed: ' . pg_last_error());
                 $crosslinkers = [];
@@ -577,26 +582,26 @@ if (count($_GET) > 0) {
 
                 //interactors
                 $interactors = [];
-                $interactorQuery = "SELECT accession, sequence, features, array_to_json(go) AS go FROM uniprot_trembl WHERE accession IN ('"
-                        .implode(array_keys($interactorAccs), "','")."');";
-                try {
-                    // @ stops pg_connect echo'ing out failure messages that knacker the returned data
-                    $interactorDbConn = @pg_connect($interactionConnection);
-                    if ($interactorDbConn) {
-                        $interactorResult = pg_query($interactorQuery);
-                        $line = pg_fetch_array($interactorResult, null, PGSQL_ASSOC);
-                        while ($line) {
-                            $line["features"] = json_decode($line["features"]);
-                            $line["go"] = json_decode($line["go"]);
-                            $interactors[$line["accession"]] = $line;
-                            $line = pg_fetch_array($interactorResult, null, PGSQL_ASSOC);
-                        }
-                    } else {
-                        throw new Exception("Could not connect to uniprot interactor database");
-                    }
-                } catch (Exception $e) {
-                    $output["warn"] = "Could not connect to uniprot interactor database";
-                }
+//                 $interactorQuery = "SELECT accession, sequence, features, array_to_json(go) AS go FROM uniprot_trembl WHERE accession IN ('"
+//                         .implode(array_keys($interactorAccs), "','")."');";
+//                 try {
+//                     // @ stops pg_connect echo'ing out failure messages that knacker the returned data
+//                     $interactorDbConn = @pg_connect($interactionConnection);
+//                     if ($interactorDbConn) {
+//                         $interactorResult = pg_query($interactorQuery);
+//                         $line = pg_fetch_array($interactorResult, null, PGSQL_ASSOC);
+//                         while ($line) {
+//                             $line["features"] = json_decode($line["features"]);
+//                             $line["go"] = json_decode($line["go"]);
+//                             $interactors[$line["accession"]] = $line;
+//                             $line = pg_fetch_array($interactorResult, null, PGSQL_ASSOC);
+//                         }
+//                     } else {
+//                         throw new Exception("Could not connect to uniprot interactor database");
+//                     }
+//                 } catch (Exception $e) {
+//                     $output["warn"] = "Could not connect to uniprot interactor database";
+//                 }
                 $output["interactors"] = $interactors;
                 $times["uniprotQuery"] = microtime(true) - $zz;
                 $zz = microtime(true);
