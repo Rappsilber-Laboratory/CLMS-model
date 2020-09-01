@@ -39,7 +39,14 @@ if (count($_GET) > 0) {
             }
         }
 
-        $linears = false;
+        $auto = false;
+        if (isset($_GET['auto'])) {
+            if ($_GET['auto'] === '1' || $_GET['auto'] === '0') {
+                $auto = (bool) $_GET['auto'];
+            }
+        }
+
+            $linears = false;
         if (isset($_GET['linears'])) {
             if ($_GET['linears'] === '1' || $_GET['linears'] === '0') {
                 $linears = (bool) $_GET['linears'];
@@ -317,9 +324,14 @@ if (count($_GET) > 0) {
             // }
 
             if ($unval == false) {
-                $WHERE_spectrumMatch = $WHERE_spectrumMatch." AND ((sm.autovalidated = true AND (sm.rejected != true OR sm.rejected is null)) OR
+                if ($auto == false) {
+                    $WHERE_spectrumMatch = $WHERE_spectrumMatch . " AND (
                             (sm.validated LIKE 'A') OR (sm.validated LIKE 'B') OR (sm.validated LIKE 'C')
                             OR (sm.validated LIKE '?')) ";
+                } else {
+                    $WHERE_spectrumMatch = $WHERE_spectrumMatch . " AND (sm.autovalidated = true) ";
+//                (sm.autovalidated = true AND (sm.rejected != true OR sm.rejected is null)
+                }
             }
 
 
@@ -361,6 +373,10 @@ if (count($_GET) > 0) {
                 INNER JOIN spectrum sp ON sm.spectrum_id = sp.id
                         ORDER BY score DESC, sm.id;";
         //}
+//
+//            echo $query;
+//            echo "\n";
+
 
             $res = pg_query($query) or die('{"error": "Query failed: ' . pg_last_error().'"}');
             $times["matchQueryDone"] = microtime(true) - $zz;
@@ -560,8 +576,8 @@ if (count($_GET) > 0) {
                             description, accession_number as accession, sequence as seq_mods, is_decoy
                         FROM protein WHERE id IN ('".implode(array_keys($dbIds), "','")."')";
                 $res = pg_query($query) or die('Query failed: ' . pg_last_error());
-                    $times["proteinQuery"] = microtime(true) - $zz;
-                    $zz = microtime(true);
+                $times["proteinQuery"] = microtime(true) - $zz;
+                $zz = microtime(true);
                 $interactorAccs = [];
 
                     $line = pg_fetch_assoc($res);
@@ -577,7 +593,7 @@ if (count($_GET) > 0) {
 
                 }
                 $output["proteins"] = $proteins;
-                    $times["proteinQueryToArray"] = microtime(true) - $zz;
+                $times["proteinQueryToArray"] = microtime(true) - $zz;
                 $zz = microtime(true);
 
                 //interactors
@@ -618,7 +634,7 @@ if (count($_GET) > 0) {
         $output["timeStamp"] = $_SERVER["REQUEST_TIME"];
 
         // Free resultset
-        pg_free_result($res);
+//        pg_free_result($res);
         } catch (Exception $e) {
             $output["error"] = $e;
         }
