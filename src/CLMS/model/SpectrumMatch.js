@@ -231,14 +231,14 @@ CLMS.model.SpectrumMatch.prototype.associateWithLink = function(proteins, crossL
 
     if (this.containingModel.isMatchingProteinPair(fromProt, toProt)) {
         this.couldBelongToSelfLink = true;
-    } else {
+    } else if (!this.isMonoLink()) {
         this.couldBelongToBetweenLink = true;
     }
 
     // again, order id string by prot id or by residue if self-link
     var endsReversedInResLinkId = false;
     var crossLinkID;
-    if (!p2ID || p2ID == "" || p2ID == '-' || p2ID == 'n/a') {
+    if (this.isLinear()) {
         crossLinkID = p1ID + "_linears";
     } else if (p1ID === p2ID || p2ID === null) {
         if ((res1 - 0) < (res2 - 0) || res2 === null) {
@@ -262,7 +262,7 @@ CLMS.model.SpectrumMatch.prototype.associateWithLink = function(proteins, crossL
         //WATCH OUT - residues need to be in correct order
         if (!p2ID) {
             resLink = new CLMS.model.CrossLink(crossLinkID, fromProt,
-                null, null, null, this.containingModel);
+                res1, null, null, this.containingModel);
         } else if (p1ID === p2ID) {
             if ((res1 - 0) < (res2 - 0)) {
                 resLink = new CLMS.model.CrossLink(crossLinkID, fromProt, res1, toProt, res2, this.containingModel);
@@ -338,9 +338,9 @@ CLMS.model.SpectrumMatch.prototype.isMonoLink = function() {
 }
 
 CLMS.model.SpectrumMatch.prototype.runName = function() {
-    if (this.run_name) {
-        return this.run_name;
-    }
+    //if (this.run_name) {
+    //    return this.run_name;
+    //}
     var runName = this.containingModel.get("spectrumSources").get(this.src);
     return runName;
 }
