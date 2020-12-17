@@ -472,10 +472,12 @@ CLMS.model.SpectrumMatch.prototype.experimentalMissedCleavageCount = function() 
                             if (seqMods[i + 1] >= "A" && seqMods[i + 1] <= "Z") {
                                 if (i != indexOfLinkedAA) {
                                     var postConstrained = false;
-                                    for (var pc of spec.postConstraint) {
-                                        if (peptide.sequence[i+1] == pc) {
-                                            postConstrained = true;
-                                            break;
+                                    if (spec.postConstraint) {
+                                        for (var pc of spec.postConstraint) {
+                                            if (peptide.sequence[i + 1] == pc) {
+                                                postConstrained = true;
+                                                break;
+                                            }
                                         }
                                     }
                                     if (!postConstrained){
