@@ -17,12 +17,16 @@ if (count($_GET) > 0) {
     $id = validateID_RandID($dbconn, $sid);
 
     if ($id > 0) {
-        $query = "SELECT peak_list
+        $query = "SELECT array_to_json(mz) as mz, array_to_json(intensity) as intensity 
 			FROM spectra
 			WHERE id = $spid AND upload_id = $id;";
         $res = pg_query($dbconn, $query) or die('Query failed: ' . pg_last_error());
         $row = pg_fetch_row($res);
-        echo $row[0];
+//        echo $row[0];
+        $output = [];
+        $output["mz"] = json_decode($row[0]);
+        $output["intensity"] = json_decode($row[1]);
+        echo json_encode($output);
         // Free resultset
         pg_free_result($res);
     }

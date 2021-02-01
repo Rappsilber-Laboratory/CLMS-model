@@ -196,7 +196,7 @@ if (count($_GET) > 0) {
     /*
      * SPECTRA
      */
-    $query = "SELECT id, upload_id, peak_list_file_name, scan_id, frag_tol,  (peak_list is not null) as pks FROM spectra WHERE ".$WHERE_uploadClause.";";
+    $query = "SELECT id, upload_id, peak_list_file_name, scan_id, frag_tol,  (mz is not null) as pks FROM spectra WHERE ".$WHERE_uploadClause.";";
     $startTime = microtime(true);
     $res = pg_query($query) or die('Query failed: ' . pg_last_error());
     $endTime = microtime(true);
@@ -354,7 +354,7 @@ if (count($_GET) > 0) {
 
     //interactors
     $interactors = [];
-    $interactorQuery = "SELECT accession, sequence, gene, array_to_json(keywords) as keywords, array_to_json(comments) as comments, features, array_to_json(go) AS go FROM uniprot_trembl WHERE accession IN ('"             .implode(array_keys($interactorAccs), "','")."');";
+    $interactorQuery = "SELECT accession, sequence, gene, array_to_json(keywords) as keywords, array_to_json(comments) as comments, features, array_to_json(go) AS go FROM uniprot WHERE accession IN ('"             .implode(array_keys($interactorAccs), "','")."');";
      try {
          // @ stops pg_connect echo'ing out failure messages that knacker the returned data
          $interactorDbConn = @pg_connect($interactionConnection);
