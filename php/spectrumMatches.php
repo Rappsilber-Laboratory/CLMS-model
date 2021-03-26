@@ -354,7 +354,7 @@ if (count($_GET) > 0) {
 
     //interactors
     $interactors = [];
-    $interactorQuery = "SELECT accession, sequence, gene, array_to_json(keywords) as keywords, array_to_json(comments) as comments, features, array_to_json(go) AS go FROM uniprot_trembl WHERE accession IN ('"             .implode(array_keys($interactorAccs), "','")."');";
+    $interactorQuery = "SELECT accession, sequence, gene, array_to_json(keywords) as keywords, array_to_json(comments) as comments, features, array_to_json(go) AS go FROM uniprot WHERE accession IN ('"             .implode(array_keys($interactorAccs), "','")."');";
      try {
          // @ stops pg_connect echo'ing out failure messages that knacker the returned data
          $interactorDbConn = @pg_connect($interactionConnection);
