@@ -2,6 +2,13 @@ var CLMS = CLMS || {};
 
 CLMS.model = CLMS.model || {};
 
+//used by xiNET, todo - take out
+CLMS.removeDomElement = function(child) {
+    if (child && child.parentNode) {
+        child.parentNode.removeChild(child);
+    }
+};
+
 CLMS.model.SearchResultsModel = Backbone.Model.extend({
     //http://stackoverflow.com/questions/19835163/backbone-model-collection-property-not-empty-on-new-model-creation
     defaults: function() {
