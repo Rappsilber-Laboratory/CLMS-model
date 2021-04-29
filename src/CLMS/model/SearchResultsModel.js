@@ -1,55 +1,4 @@
-//      CLMS-model
-//      Copyright 2015 Rappsilber Laboratory, Edinburgh University
-//
-//      authors: Colin Combe, Martin Graham
-//
-//      SearchResultsModel.js
-
-
 var CLMS = CLMS || {};
-
-//For IE, which doesn't yet support values(). entries(), or keys() on ECMA6 Map
-CLMS.arrayFromMapValues = function(map) {
-    if (map.values && Array.from) {
-        return Array.from(map.values());
-    } else {
-        var array = [];
-        map.forEach(function(value, key, map) {
-            array.push(value);
-        });
-        return array;
-    }
-};
-
-CLMS.arrayFromMapEntries = function(map) {
-    if (map.entries && Array.from) {
-        return Array.from(map.entries());
-    } else {
-        var array = [];
-        map.forEach(function(value, key, map) {
-            array.push([key, value])
-        });
-        return array;
-    }
-};
-
-CLMS.arrayFromMapKeys = function(map) {
-    if (map.keys && Array.from) {
-        return Array.from(map.keys());
-    } else {
-        var array = [];
-        map.forEach(function(value, key, map) {
-            array.push(key)
-        });
-        return array;
-    }
-};
-
-CLMS.removeDomElement = function(child) {
-    if (child && child.parentNode) {
-        child.parentNode.removeChild(child);
-    }
-};
 
 CLMS.model = CLMS.model || {};
 
@@ -132,7 +81,7 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             }
 
             var addEnzymeSpecificityResidues = function(residueSet, type) {
-                var resArray = CLMS.arrayFromMapValues(residueSet);
+                var resArray = Array.from(residueSet.values());
                 var resCount = resArray.length;
                 for (var r = 0; r < resCount; r++) {
                     enzymeSpecificity.push({
@@ -259,7 +208,7 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             }
             this.initDecoyLookup();
 
-            var participantArr = CLMS.arrayFromMapValues(participants);
+            // var participantArr = CLMS.arrayFromMapValues(participants);
 
             //peptides
             var peptides = new Map();
@@ -331,7 +280,7 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             this.set("minScore", minScore);
             this.set("maxScore", maxScore);
 
-            var participantArray = CLMS.arrayFromMapValues(participants);
+            const participantArray = Array.from(participants.values());
             // only count real participants towards participant count (which is used as cut-off further on)
             var targetParticipantArray = participantArray.filter(function(p) {
                 return !p.is_decoy;
@@ -970,7 +919,7 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
     initDecoyLookup: function(prefixes) {
         // Make map of reverse/random decoy proteins to real proteins
         prefixes = prefixes || ["REV_", "RAN_", "DECOY_", "DECOY:", "reverse_", "REV", "RAN"];
-        var prots = CLMS.arrayFromMapValues(this.get("participants"));
+        const prots = Array.from(this.get("participants").values());
         var nameMap = d3.map();
         var accessionMap = d3.map();
         prots.forEach(function(prot) {
