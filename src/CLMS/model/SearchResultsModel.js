@@ -2,6 +2,43 @@ var CLMS = CLMS || {};
 
 CLMS.model = CLMS.model || {};
 
+//For IE, which doesn't yet support values(). entries(), or keys() on ECMA6 Map
+CLMS.arrayFromMapValues = function(map) {
+    if (map.values && Array.from) {
+        return Array.from(map.values());
+    } else {
+        var array = [];
+        map.forEach(function(value, key, map) {
+            array.push(value);
+        });
+        return array;
+    }
+};
+
+CLMS.arrayFromMapEntries = function(map) {
+    if (map.entries && Array.from) {
+        return Array.from(map.entries());
+    } else {
+        var array = [];
+        map.forEach(function(value, key, map) {
+            array.push([key, value])
+        });
+        return array;
+    }
+};
+
+CLMS.arrayFromMapKeys = function(map) {
+    if (map.keys && Array.from) {
+        return Array.from(map.keys());
+    } else {
+        var array = [];
+        map.forEach(function(value, key, map) {
+            array.push(key)
+        });
+        return array;
+    }
+};
+
 //used by xiNET, todo - take out
 CLMS.removeDomElement = function(child) {
     if (child && child.parentNode) {
