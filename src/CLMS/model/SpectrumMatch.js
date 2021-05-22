@@ -392,7 +392,9 @@ CLMS.model.SpectrumMatch.prototype.fragmentTolerance = function() {
 
 CLMS.model.SpectrumMatch.prototype.fragmentToleranceString = function() {
     var fragTol = this.fragmentTolerance();
-    return fragTol.tolerance + " " + fragTol.unit;
+    if (fragTol) {
+        return fragTol.tolerance + " " + fragTol.unit;
+    }
 }
 
 CLMS.model.SpectrumMatch.prototype.score = function() {
