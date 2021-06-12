@@ -1,11 +1,3 @@
-//      xiNET cross-link viewer
-//      Copyright 2013 Rappsilber Laboratory, University of Edinburgh
-//
-//      author: Colin Combe
-//
-//      CLMS.model.CrossLink.js
-//      the class representing a residue-residue link
-
 CLMS.model.CrossLink = function(id, fromProtein, fromResidue, toProtein, toResidue) {
     this.id = id;
     this.matches_pp = [];
@@ -18,8 +10,8 @@ CLMS.model.CrossLink = function(id, fromProtein, fromResidue, toProtein, toResid
 };
 
 CLMS.model.CrossLink.prototype.isDecoyLink = function() {
-    return (this.fromProtein.is_decoy == true ||
-        (this.toProtein && this.toProtein.is_decoy == true));
+    return (this.fromProtein.is_decoy === true ||
+        (this.toProtein && this.toProtein.is_decoy === true));
 };
 
 CLMS.model.CrossLink.prototype.isSelfLink = function() {

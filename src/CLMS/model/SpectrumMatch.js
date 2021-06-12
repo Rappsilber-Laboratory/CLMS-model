@@ -1,10 +1,3 @@
-//      xiNET cross-link viewer
-//      Copyright 2013 Rappsilber Laboratory
-//
-//      author: Colin Combe
-//
-//      CLMS.model.SpectrumMatch.js
-
 //temp
 CLMS.model.dupScans = new Map();
 CLMS.model.dupCount = 0;
@@ -34,7 +27,7 @@ CLMS.model.SpectrumMatch = function(containingModel, participants, crossLinks, p
     this.searchId = rawMatches[0].si.toString();
     this.crosslinker_id = rawMatches[0].cl;
     if (rawMatches[0].dc) {
-        this.is_decoy = (rawMatches[0].dc == 't') ? true : false;
+        this.is_decoy = (rawMatches[0].dc === 't');
     }
     if (this.is_decoy === true) {
         this.containingModel.set("decoysPresent", true);
@@ -53,7 +46,7 @@ CLMS.model.SpectrumMatch = function(containingModel, participants, crossLinks, p
     }
 
     this.precursorCharge = +rawMatches[0].pc_c;
-    if (this.precursorCharge == -1) {
+    if (this.precursorCharge === -1) {
         this.precursorCharge = undefined;
     }
 
@@ -62,11 +55,7 @@ CLMS.model.SpectrumMatch = function(containingModel, participants, crossLinks, p
     this._score = +rawMatches[0].sc;
     //autovalidated - another attribute
     if (rawMatches[0].av) {
-        if (rawMatches[0].av == "t") {
-            this.autovalidated = true;
-        } else {
-            this.autovalidated = false;
-        }
+        this.autovalidated = rawMatches[0].av === "t";
         this.containingModel.set("autoValidatedPresent", true);
     }
     // used in Rappsilber Lab to record manual validation status
@@ -98,15 +87,15 @@ CLMS.model.SpectrumMatch = function(containingModel, participants, crossLinks, p
         this.linkPos2 = +rawMatches[1].lp;
     }
 
-    if (this.linkPos1 == 0) { //would have been -1 in DB but 1 was added to it during query
+    if (this.linkPos1 === 0) { //would have been -1 in DB but 1 was added to it during query
         //its a linear
         this.containingModel.set("linearsPresent", true);
-        for (var i = 0; i < this.matchedPeptides[0].prt.length; i++) {
+        for (let i = 0; i < this.matchedPeptides[0].prt.length; i++) {
             p1ID = this.matchedPeptides[0].prt[i];
             this.associateWithLink(participants, crossLinks, p1ID);
         }
         if (this.matchedPeptides[1]) {
-            for (var i = 0; i < this.matchedPeptides[1].prt.length; i++) {
+            for (let i = 0; i < this.matchedPeptides[1].prt.length; i++) {
                 p1ID = this.matchedPeptides[1].prt[i];
                 this.associateWithLink(participants, crossLinks, p1ID);
             }
@@ -117,17 +106,13 @@ CLMS.model.SpectrumMatch = function(containingModel, participants, crossLinks, p
     this.couldBelongToBetweenLink = false;
     this.couldBelongToSelfLink = false;
 
-    var self = this;
-
     // the protein IDs and residue numers we eventually want to get:-
-    var p1ID, p2ID, res1, res2;
-    //used along the way:-
-    var iProt, jProt;
+    let p1ID, p2ID, res1, res2;
 
     //loop to produce all alternative linkage site combinations
     //(position1 count * position2 count alternative)
-    for (var i = 0; i < this.matchedPeptides[0].pos.length; i++) {
-        for (var j = 0; j < this.matchedPeptides[1].pos.length; j++) {
+    for (let i = 0; i < this.matchedPeptides[0].pos.length; i++) {
+        for (let j = 0; j < this.matchedPeptides[1].pos.length; j++) {
 
             if (i > 0 || j > 0) {
                 this.containingModel.set("ambiguousPresent", true);
@@ -157,16 +142,16 @@ CLMS.model.SpectrumMatch = function(containingModel, participants, crossLinks, p
     //identify homodimers: if peptides overlap its a homodimer
     this.confirmedHomomultimer = false;
     this.overlap = [];
-    if (this.isAmbig() == false && p1ID == p2ID) { //todo: potential problem re ambiguous homo-multimer link (compare current behaviour to xiNET paper product type fig)
+    if (this.isAmbig() === false && p1ID === p2ID) { //todo: potential problem re ambiguous homo-multimer link (compare current behaviour to xiNET paper product type fig)
 
         if (this.matchedPeptides[0].sequence && this.matchedPeptides[1].sequence) {
 
-            var pep1length = this.matchedPeptides[0].sequence.length;
-            var pep2length = this.matchedPeptides[1].sequence.length;
-            var pep1_start = +this.matchedPeptides[0].pos[0];
-            var pep2_start = +this.matchedPeptides[1].pos[0];
-            var pep1_end = pep1_start + (pep1length - 1);
-            var pep2_end = pep2_start + (pep2length - 1);
+            const pep1length = this.matchedPeptides[0].sequence.length;
+            const pep2length = this.matchedPeptides[1].sequence.length;
+            const pep1_start = +this.matchedPeptides[0].pos[0];
+            const pep2_start = +this.matchedPeptides[1].pos[0];
+            const pep1_end = pep1_start + (pep1length - 1);
+            const pep2_end = pep2_start + (pep2length - 1);
             if (pep1_start >= pep2_start && pep1_start <= pep2_end) {
                 this.confirmedHomomultimer = true;
                 this.overlap[0] = pep1_start - 1;
@@ -200,9 +185,9 @@ CLMS.model.SpectrumMatch.prototype.associateWithLink = function(proteins, crossL
 
     //todo: this end swapping thing, its a possible source of confusion
 
-    var fromProt, toProt;
+    let fromProt, toProt;
 
-    if (!p2ID || p2ID == "" || p2ID == '-' || p2ID == 'n/a') { //its  a linear peptide (no crosslinker of any product type))
+    if (!p2ID || p2ID === "" || p2ID === '-' || p2ID === 'n/a') { //its  a linear peptide (no crosslinker of any product type))
         this.containingModel.set("linearsPresent", true);
         fromProt = proteins.get(p1ID);
         if (!fromProt) {
@@ -236,8 +221,8 @@ CLMS.model.SpectrumMatch.prototype.associateWithLink = function(proteins, crossL
     }
 
     // again, order id string by prot id or by residue if self-link
-    var endsReversedInResLinkId = false;
-    var crossLinkID;
+    let endsReversedInResLinkId = false;
+    let crossLinkID;
     if (this.isLinear()) {
         crossLinkID = p1ID + "_linears";
     } else if (p1ID === p2ID || p2ID === null) {
@@ -255,7 +240,7 @@ CLMS.model.SpectrumMatch.prototype.associateWithLink = function(proteins, crossL
     }
 
     //get or create residue link
-    var resLink = crossLinks.get(crossLinkID);
+    let resLink = crossLinks.get(crossLinkID);
     if (typeof resLink == 'undefined') {
         //to and from proteins were already swapped over above
 
@@ -271,7 +256,7 @@ CLMS.model.SpectrumMatch.prototype.associateWithLink = function(proteins, crossL
             }
         }
         //
-        else if (p1ID == fromProt.id) {
+        else if (p1ID === fromProt.id) {
             resLink = new CLMS.model.CrossLink(crossLinkID, fromProt, res1, toProt, res2, this.containingModel);
         } else {
             //WATCH OUT - residues need to be in correct oprder
@@ -280,12 +265,12 @@ CLMS.model.SpectrumMatch.prototype.associateWithLink = function(proteins, crossL
         crossLinks.set(crossLinkID, resLink);
 
         fromProt.crossLinks.push(resLink);
-        if (toProt != null && (toProt != fromProt)) {
+        if (toProt && (toProt !== fromProt)) {
             toProt.crossLinks.push(resLink);
         }
     }
 
-    var peptidePositions = [];
+    const peptidePositions = [];
     if (endsReversedInResLinkId === false) {
         peptidePositions.push({
             start: pep1_start,
@@ -313,11 +298,8 @@ CLMS.model.SpectrumMatch.prototype.associateWithLink = function(proteins, crossL
 }
 
 CLMS.model.SpectrumMatch.prototype.isAmbig = function() {
-    if (this.matchedPeptides[0].pos.length > 1 ||
-        (this.matchedPeptides[1] && this.matchedPeptides[1].pos.length > 1)) {
-        return true;
-    }
-    return false;
+    return this.matchedPeptides[0].pos.length > 1 ||
+        (this.matchedPeptides[1] && this.matchedPeptides[1].pos.length > 1);
 }
 
 CLMS.model.SpectrumMatch.prototype.isDecoy = function() {
@@ -338,21 +320,15 @@ CLMS.model.SpectrumMatch.prototype.isMonoLink = function() {
 }
 
 CLMS.model.SpectrumMatch.prototype.runName = function() {
-    //if (this.run_name) {
-    //    return this.run_name;
-    //}
-    var runName = this.containingModel.get("spectrumSources").get(this.src);
-    return runName;
+    return this.containingModel.get("spectrumSources").get(this.src);
 }
 
 CLMS.model.SpectrumMatch.prototype.peakListFileName = function() {
-    var peakListName = this.containingModel.get("peakListFiles").get(this.plf);
-    return peakListName;
+    return this.containingModel.get("peakListFiles").get(this.plf);
 }
 
 CLMS.model.SpectrumMatch.prototype.group = function() {
-    var group = this.containingModel.get("searches").get(this.searchId).group;
-    return group;
+    return this.containingModel.get("searches").get(this.searchId).group;
 }
 
 CLMS.model.SpectrumMatch.prototype.expMZ = function() {
@@ -376,11 +352,10 @@ CLMS.model.SpectrumMatch.prototype.calcMass = function() {
 
 
 CLMS.model.SpectrumMatch.prototype.missingPeaks = function() {
-    var errorMZ = this.expMZ() - this.calcMZ();
-    var errorM = errorMZ * this.precursorCharge;
+    const errorMZ = this.expMZ() - this.calcMZ();
+    const errorM = errorMZ * this.precursorCharge;
     //how many peaks assumed missing/miss-assigned
-    var missingPeaks = Math.round(errorM / CLMS.model.SpectrumMatch.C13_MASS_DIFFERENCE);
-    return missingPeaks;
+    return Math.round(errorM / CLMS.model.SpectrumMatch.C13_MASS_DIFFERENCE);
 }
 
 CLMS.model.SpectrumMatch.prototype.massError = function() {
@@ -389,8 +364,8 @@ CLMS.model.SpectrumMatch.prototype.massError = function() {
 
     // new - change needed due to some other change to do with missing peaks
     // what is the error in m/z
-    var assumedMZ = this.expMZ() - this.missingPeaks() * CLMS.model.SpectrumMatch.C13_MASS_DIFFERENCE / this.precursorCharge;
-    var errorMZ = assumedMZ - this.calcMZ();
+    const assumedMZ = this.expMZ() - this.missingPeaks() * CLMS.model.SpectrumMatch.C13_MASS_DIFFERENCE / this.precursorCharge;
+    const errorMZ = assumedMZ - this.calcMZ();
     return errorMZ / this.calcMZ() * 1000000;
 }
 
@@ -399,10 +374,10 @@ CLMS.model.SpectrumMatch.prototype.ionTypes = function() {
 }
 
 CLMS.model.SpectrumMatch.prototype.ionTypesString = function() {
-    var ions = this.ionTypes();
-    var returnString = "";
-    for (var i = 0; i < ions.length; i++) {
-        var ion = ions[i].type;
+    const ions = this.ionTypes();
+    let returnString = "";
+    for (let i = 0; i < ions.length; i++) {
+        let ion = ions[i].type;
         if (ion.indexOf("Ion") > 0) {
             ion = ion.substring(0, ion.indexOf("Ion"));
         }
@@ -412,7 +387,7 @@ CLMS.model.SpectrumMatch.prototype.ionTypesString = function() {
 }
 
 CLMS.model.SpectrumMatch.prototype.crossLinkerModMass = function() {
-    var crosslinker = this.getCrossLinker()
+    const crosslinker = this.getCrossLinker();
     if (crosslinker) {
         return crosslinker.mass;
     }
@@ -420,22 +395,22 @@ CLMS.model.SpectrumMatch.prototype.crossLinkerModMass = function() {
 }
 
 CLMS.model.SpectrumMatch.prototype.getCrossLinker = function() {
-    if (this.crosslinker_id == -1) {
+    if (this.crosslinker_id === -1) {
         return null;
     }
 
-    var crosslinkers = this.containingModel.get("searches").get(this.searchId).crosslinkers;
-    var clCount = crosslinkers.length;
-    for (var c = 0; c < clCount; c++) {
-        var crosslinker = crosslinkers[c];
-        if (crosslinker.id == this.crosslinker_id) {
+    const crosslinkers = this.containingModel.get("searches").get(this.searchId).crosslinkers;
+    const clCount = crosslinkers.length;
+    for (let c = 0; c < clCount; c++) {
+        const crosslinker = crosslinkers[c];
+        if (crosslinker.id === this.crosslinker_id) {
             return crosslinker;
         }
     }
 }
 
 CLMS.model.SpectrumMatch.prototype.fragmentTolerance = function() {
-    var search = this.containingModel.get("searches").get(this.searchId);
+    const search = this.containingModel.get("searches").get(this.searchId);
     return {
         "tolerance": search.ms2tolerance,
         'unit': search.ms2toleranceunits
@@ -443,7 +418,7 @@ CLMS.model.SpectrumMatch.prototype.fragmentTolerance = function() {
 }
 
 CLMS.model.SpectrumMatch.prototype.fragmentToleranceString = function() {
-    var search = this.containingModel.get("searches").get(this.searchId);
+    const search = this.containingModel.get("searches").get(this.searchId);
     return search.ms2tolerance + " " + search.ms2toleranceunits;
 }
 
@@ -452,29 +427,29 @@ CLMS.model.SpectrumMatch.prototype.score = function() {
 }
 
 CLMS.model.SpectrumMatch.prototype.experimentalMissedCleavageCount = function() {
-    var enzymeSpecificity = this.containingModel.get("enzymeSpecificity");
+    const enzymeSpecificity = this.containingModel.get("enzymeSpecificity");
 
     //yes... this should prob be done with regex
     // (https://github.com/Rappsilber-Laboratory/xi3-issue-tracker/issues/401#issuecomment-495158293)
 
     function countMissedCleavages(peptide, linkPos) {
-        var count = 0;
-        var seqMods = peptide.seq_mods;
+        let count = 0;
+        const seqMods = peptide.seq_mods;
         if (seqMods) {
-            var pepLen = seqMods.length;
+            const pepLen = seqMods.length;
 
-            var indexOfLinkedAA = findIndexofNthUpperCaseLetter(seqMods, linkPos);
+            const indexOfLinkedAA = findIndexofNthUpperCaseLetter(seqMods, linkPos);
 
-            for (var i = 0; i < pepLen; i++) {
-                for (var spec of enzymeSpecificity) {
-                    if (seqMods[i] == spec.aa) {
+            for (let i = 0; i < pepLen; i++) {
+                for (let spec of enzymeSpecificity) {
+                    if (seqMods[i] === spec.aa) {
                         if (i < pepLen) {
                             if (seqMods[i + 1] >= "A" && seqMods[i + 1] <= "Z") {
-                                if (i != indexOfLinkedAA) {
-                                    var postConstrained = false;
+                                if (i !== indexOfLinkedAA) {
+                                    let postConstrained = false;
                                     if (spec.postConstraint) {
-                                        for (var pc of spec.postConstraint) {
-                                            if (peptide.sequence[i + 1] == pc) {
+                                        for (let pc of spec.postConstraint) {
+                                            if (peptide.sequence[i + 1] === pc) {
                                                 postConstrained = true;
                                                 break;
                                             }
@@ -493,34 +468,34 @@ CLMS.model.SpectrumMatch.prototype.experimentalMissedCleavageCount = function() 
         return count;
     }
 
-    var findIndexofNthUpperCaseLetter = function(str, n) { // n is 1-indexed here
-        var i = -1;
+    function findIndexofNthUpperCaseLetter (str, n) { // n is 1-indexed here
+        let i = -1;
         while (n > 0 && i < str.length) {
             i++;
-            var c = str[i];
+            const c = str[i];
             if (c >= "A" && c <= "Z") n--;
         }
         return i === str.length ? undefined : i;
     };
 
-    var mc1 = countMissedCleavages(this.matchedPeptides[0], this.linkPos1);
+    const mc1 = countMissedCleavages(this.matchedPeptides[0], this.linkPos1);
     if (this.matchedPeptides[1]) {
-        var mc2 = countMissedCleavages(this.matchedPeptides[1], this.linkPos2);
+        const mc2 = countMissedCleavages(this.matchedPeptides[1], this.linkPos2);
         return Math.max(mc1, mc2);
     }
     return mc1;
 }
 
 CLMS.model.SpectrumMatch.prototype.searchMissedCleavageCount = function() {
-    var enzymeSpecificity = this.containingModel.get("enzymeSpecificity");
+    const enzymeSpecificity = this.containingModel.get("enzymeSpecificity");
 
-    function countSearchMissedCleavages(peptide, linkPos) {
-        var count = 0;
-        var sequence = peptide.sequence;
-        var pepLen = sequence.length;
-        for (var i = 0; i < pepLen; i++) {
-            for (var spec of enzymeSpecificity) {
-                if (sequence[i] == spec.aa) {
+    function countSearchMissedCleavages(peptide) {
+        let count = 0;
+        const sequence = peptide.sequence;
+        const pepLen = sequence.length;
+        for (let i = 0; i < pepLen; i++) {
+            for (let spec of enzymeSpecificity) {
+                if (sequence[i] === spec.aa) {
                     if (i < (pepLen - 1)) {
                         count++;
                     }
@@ -530,9 +505,9 @@ CLMS.model.SpectrumMatch.prototype.searchMissedCleavageCount = function() {
         return count;
     }
 
-    var mc1 = countSearchMissedCleavages(this.matchedPeptides[0]);
+    const mc1 = countSearchMissedCleavages(this.matchedPeptides[0]);
     if (this.matchedPeptides[1]) {
-        var mc2 = countSearchMissedCleavages(this.matchedPeptides[1]);
+        const mc2 = countSearchMissedCleavages(this.matchedPeptides[1]);
         return Math.max(mc1, mc2);
     }
     return mc1;
@@ -540,20 +515,20 @@ CLMS.model.SpectrumMatch.prototype.searchMissedCleavageCount = function() {
 
 CLMS.model.SpectrumMatch.prototype.modificationCount = function() {
     function peptideModCount(peptide) {
-        var count = 0;
-        var sequence = peptide.seq_mods;
-        var pepLen = sequence.length;
-        for (var i = 0; i < pepLen - 1; i++) {
-            var a = sequence[i];
-            var b = sequence[i + 1];
+        let count = 0;
+        const sequence = peptide.seq_mods;
+        const pepLen = sequence.length;
+        for (let i = 0; i < pepLen - 1; i++) {
+            const a = sequence[i];
+            const b = sequence[i + 1];
             if ((a >= "A" && a <= "Z") && (b < "A" || b > "Z")) count++;
         }
         return count;
     }
 
-    var modCount1 = peptideModCount(this.matchedPeptides[0]);
+    const modCount1 = peptideModCount(this.matchedPeptides[0]);
     if (this.matchedPeptides[1]) {
-        var modCount2 = peptideModCount(this.matchedPeptides[1]);
+        const modCount2 = peptideModCount(this.matchedPeptides[1]);
         if (modCount2 > modCount1) {
           return modCount2;
         }
