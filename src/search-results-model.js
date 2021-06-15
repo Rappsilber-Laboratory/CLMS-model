@@ -2,50 +2,6 @@ var CLMS = CLMS || {};
 
 CLMS.model = CLMS.model || {};
 
-//For IE, which doesn't yet support values(). entries(), or keys() on ECMA6 Map
-CLMS.arrayFromMapValues = function(map) {
-    if (map.values && Array.from) {
-        return Array.from(map.values());
-    } else {
-        const array = [];
-        map.forEach(function(value, key, map) {
-            array.push(value);
-        });
-        return array;
-    }
-};
-
-CLMS.arrayFromMapEntries = function(map) {
-    if (map.entries && Array.from) {
-        return Array.from(map.entries());
-    } else {
-        const array = [];
-        map.forEach(function(value, key, map) {
-            array.push([key, value])
-        });
-        return array;
-    }
-};
-
-CLMS.arrayFromMapKeys = function(map) {
-    if (map.keys && Array.from) {
-        return Array.from(map.keys());
-    } else {
-        const array = [];
-        map.forEach(function(value, key, map) {
-            array.push(key)
-        });
-        return array;
-    }
-};
-
-//used by xiNET, todo - take out
-CLMS.removeDomElement = function(child) {
-    if (child && child.parentNode) {
-        child.parentNode.removeChild(child);
-    }
-};
-
 CLMS.model.SearchResultsModel = Backbone.Model.extend({
     //http://stackoverflow.com/questions/19835163/backbone-model-collection-property-not-empty-on-new-model-creation
     defaults: function() {
