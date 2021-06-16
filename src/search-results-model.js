@@ -4,8 +4,8 @@ import {SpectrumMatch} from "./spectrum-match";
 
 export class SearchResultsModel extends Backbone.Model {
 
-    constructor() {
-        super();
+    constructor(attributes, options) {
+        super(attributes, options);
     }
 
     //http://stackoverflow.com/questions/19835163/backbone-model-collection-property-not-empty-on-new-model-creation
