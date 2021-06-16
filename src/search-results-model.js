@@ -13,7 +13,7 @@ export class SearchResultsModel extends Backbone.Model {
         return {
             participants: new Map(), //map
             matches: [],
-            crossLinks: new Map(), //map
+            crosslinks: new Map(), //map
             scoreExtent: null,
             searches: new Map(),
             decoysPresent: false,
@@ -219,7 +219,7 @@ export class SearchResultsModel extends Backbone.Model {
                 }
             }
 
-            const crossLinks = this.get("crossLinks");
+            const crosslinks = this.get("crosslinks");
 
             const rawMatches = json.rawMatches;
             let minScore = undefined;
@@ -261,7 +261,7 @@ export class SearchResultsModel extends Backbone.Model {
                         //rawMatch.cl = rawMatch.cl[0]; // PHP/SQL now returns crosslinker_id as single value, not array
                     }
 
-                    match = new SpectrumMatch(this, participants, crossLinks, peptides, rawMatchArray);
+                    match = new SpectrumMatch(this, participants, crosslinks, peptides, rawMatchArray);
                     matches.push(match);
 
                     if (maxScore === undefined || match.score() > maxScore) {
@@ -324,8 +324,8 @@ export class SearchResultsModel extends Backbone.Model {
             protObj.sequence = protObj.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, '');
         }
         if (protObj.sequence) protObj.size = protObj.sequence.length;
-        if (!protObj.crossLinks) {
-            protObj.crossLinks = [];
+        if (!protObj.crosslinks) {
+            protObj.crosslinks = [];
         }
         protObj.hidden = false; //?
 
@@ -390,8 +390,8 @@ export class SearchResultsModel extends Backbone.Model {
         const temp = d3.values(linkedResSets);
         for (let cl = 0; cl < temp.length; cl++) {
             // resSet = {searches: new Set(), linkables: [], name: crosslinkerName};
-            const crossLinkerLinkedResSet = temp[cl];
-            const linkables = crossLinkerLinkedResSet.linkables;
+            const crosslinkerLinkedResSet = temp[cl];
+            const linkables = crosslinkerLinkedResSet.linkables;
 
             //for (var l = 0 ; l < linkables.length; l++) {
             if (linkables[reactiveGroup - 1]) {
@@ -470,8 +470,8 @@ export class SearchResultsModel extends Backbone.Model {
             return this.isMatchingProteinPair(prot1, prot2);
         },
     */
-    isSelfLink(crossLink) {
-        return crossLink.isSelfLink();
+    isSelfLink(crosslink) {
+        return crosslink.isSelfLink();
     }
 
     getSearchRandomId(match) {

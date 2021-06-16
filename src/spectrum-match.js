@@ -1,7 +1,7 @@
 import {Crosslink} from "./crosslink";
 
 export class SpectrumMatch {
-    constructor(containingModel, participants, crossLinks, peptides, rawMatches) {
+    constructor(containingModel, participants, crosslinks, peptides, rawMatches) {
 
         // single 'rawMatch'looks like {"id":25918012,"ty":1,"pi":8485630,"lp":0,
         // "sc":3.25918,"si":624, dc:"f", "av":"f", (optional v:"A", rj: "f" ),
@@ -79,8 +79,8 @@ export class SpectrumMatch {
             this.matchedPeptides = rawMatches;
         }
 
-        //if the match is ambiguous it will relate to many crossLinks
-        this.crossLinks = [];
+        //if the match is ambiguous it will relate to many crosslinks
+        this.crosslinks = [];
         this.linkPos1 = +rawMatches[0].lp;
         if (rawMatches[1]) {
             this.linkPos2 = +rawMatches[1].lp;
@@ -91,12 +91,12 @@ export class SpectrumMatch {
             this.containingModel.set("linearsPresent", true);
             for (let i = 0; i < this.matchedPeptides[0].prt.length; i++) {
                 p1ID = this.matchedPeptides[0].prt[i];
-                this.associateWithLink(participants, crossLinks, p1ID);
+                this.associateWithLink(participants, crosslinks, p1ID);
             }
             if (this.matchedPeptides[1]) {
                 for (let i = 0; i < this.matchedPeptides[1].prt.length; i++) {
                     p1ID = this.matchedPeptides[1].prt[i];
-                    this.associateWithLink(participants, crossLinks, p1ID);
+                    this.associateWithLink(participants, crosslinks, p1ID);
                 }
             }
             return;
@@ -134,7 +134,7 @@ export class SpectrumMatch {
                 res1 = +this.matchedPeptides[0].pos[i] - 1 + this.linkPos1;
                 res2 = +this.matchedPeptides[1].pos[j] - 1 + this.linkPos2;
 
-                this.associateWithLink(participants, crossLinks, p1ID, p2ID, res1, res2, this.matchedPeptides[0].pos[i] - 0, this.matchedPeptides[0].sequence.length, this.matchedPeptides[1].pos[j], this.matchedPeptides[1].sequence.length);
+                this.associateWithLink(participants, crosslinks, p1ID, p2ID, res1, res2, this.matchedPeptides[0].pos[i] - 0, this.matchedPeptides[0].sequence.length, this.matchedPeptides[1].pos[j], this.matchedPeptides[1].sequence.length);
             }
         }
 
@@ -176,7 +176,7 @@ export class SpectrumMatch {
         }
     }
 
-    associateWithLink(proteins, crossLinks, p1ID, p2ID, res1, res2, //following params may be null :-
+    associateWithLink(proteins, crosslinks, p1ID, p2ID, res1, res2, //following params may be null :-
                       pep1_start, pep1_length, pep2_start, pep2_length) {
 
         // we don't want two different ID's, e.g. one thats "33-66" and one thats "66-33"
@@ -220,51 +220,51 @@ export class SpectrumMatch {
 
         // again, order id string by prot id or by residue if self-link
         let endsReversedInResLinkId = false;
-        let crossLinkID;
+        let crosslinkID;
         if (this.isLinear()) {
-            crossLinkID = p1ID + "_linears";
+            crosslinkID = p1ID + "_linears";
         } else if (p1ID === p2ID || p2ID === null) {
             if ((res1 - 0) < (res2 - 0) || res2 === null) {
-                crossLinkID = p1ID + "_" + res1 + "-" + p2ID + "_" + res2;
+                crosslinkID = p1ID + "_" + res1 + "-" + p2ID + "_" + res2;
             } else {
-                crossLinkID = p2ID + "_" + res2 + "-" + p1ID + "_" + res1;
+                crosslinkID = p2ID + "_" + res2 + "-" + p1ID + "_" + res1;
                 endsReversedInResLinkId = true;
             }
         } else if (p1ID < p2ID) {
-            crossLinkID = p1ID + "_" + res1 + "-" + p2ID + "_" + res2;
+            crosslinkID = p1ID + "_" + res1 + "-" + p2ID + "_" + res2;
         } else {
-            crossLinkID = p2ID + "_" + res2 + "-" + p1ID + "_" + res1;
+            crosslinkID = p2ID + "_" + res2 + "-" + p1ID + "_" + res1;
             endsReversedInResLinkId = true;
         }
 
         //get or create residue link
-        let resLink = crossLinks.get(crossLinkID);
+        let resLink = crosslinks.get(crosslinkID);
         if (typeof resLink == 'undefined') {
             //to and from proteins were already swapped over above
 
             //WATCH OUT - residues need to be in correct order
             if (!p2ID) {
-                resLink = new Crosslink(crossLinkID, fromProt,
+                resLink = new Crosslink(crosslinkID, fromProt,
                     res1, null, null, this.containingModel);
             } else if (p1ID === p2ID) {
                 if ((res1 - 0) < (res2 - 0)) {
-                    resLink = new Crosslink(crossLinkID, fromProt, res1, toProt, res2, this.containingModel);
+                    resLink = new Crosslink(crosslinkID, fromProt, res1, toProt, res2, this.containingModel);
                 } else {
-                    resLink = new Crosslink(crossLinkID, fromProt, res2, toProt, res1, this.containingModel);
+                    resLink = new Crosslink(crosslinkID, fromProt, res2, toProt, res1, this.containingModel);
                 }
             }
             //
             else if (p1ID === fromProt.id) {
-                resLink = new Crosslink(crossLinkID, fromProt, res1, toProt, res2, this.containingModel);
+                resLink = new Crosslink(crosslinkID, fromProt, res1, toProt, res2, this.containingModel);
             } else {
                 //WATCH OUT - residues need to be in correct oprder
-                resLink = new Crosslink(crossLinkID, fromProt, res2, toProt, res1, this.containingModel);
+                resLink = new Crosslink(crosslinkID, fromProt, res2, toProt, res1, this.containingModel);
             }
-            crossLinks.set(crossLinkID, resLink);
+            crosslinks.set(crosslinkID, resLink);
 
-            fromProt.crossLinks.push(resLink);
+            fromProt.crosslinks.push(resLink);
             if (toProt && (toProt !== fromProt)) {
-                toProt.crossLinks.push(resLink);
+                toProt.crosslinks.push(resLink);
             }
         }
 
@@ -292,7 +292,7 @@ export class SpectrumMatch {
             match: this,
             pepPos: peptidePositions
         });
-        this.crossLinks.push(resLink);
+        this.crosslinks.push(resLink);
     }
 
     isAmbig() {
@@ -305,7 +305,7 @@ export class SpectrumMatch {
             return this.is_decoy;
         } else {
             //its from csv not database, for simplicity lets just look at first crosslink //todo - look at again
-            return this.crossLinks[0].isDecoyLink();
+            return this.crosslinks[0].isDecoyLink();
         }
     }
 
@@ -334,11 +334,11 @@ export class SpectrumMatch {
     }
 
     expMass() {
-        return this.precursorMZ * this.precursorCharge - (this.precursorCharge * CLMS.model.protonMass);
+        return this.precursorMZ * this.precursorCharge - (this.precursorCharge * SpectrumMatch.protonMass);
     }
 
     calcMZ () {
-        return (this.calc_mass + (this.precursorCharge * CLMS.model.protonMass)) / this.precursorCharge;
+        return (this.calc_mass + (this.precursorCharge * SpectrumMatch.protonMass)) / this.precursorCharge;
     }
 
     calcMass () {
@@ -380,7 +380,7 @@ export class SpectrumMatch {
         return returnString;
     }
 
-    crossLinkerModMass () {
+    crosslinkerModMass () {
         const crosslinker = this.getCrossLinker();
         if (crosslinker) {
             return crosslinker.mass;
