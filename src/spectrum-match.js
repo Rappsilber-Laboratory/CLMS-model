@@ -349,7 +349,7 @@ export class SpectrumMatch {
         const errorMZ = this.expMZ() - this.calcMZ();
         const errorM = errorMZ * this.precursorCharge;
         //how many peaks assumed missing/miss-assigned
-        return Math.round(errorM / CLMS.model.C13_MASS_DIFFERENCE);
+        return Math.round(errorM / SpectrumMatch.C13_MASS_DIFFERENCE);
     }
 
     massError () {
@@ -358,7 +358,7 @@ export class SpectrumMatch {
 
         // new - change needed due to some other change to do with missing peaks
         // what is the error in m/z
-        const assumedMZ = this.expMZ() - this.missingPeaks() * CLMS.model.C13_MASS_DIFFERENCE / this.precursorCharge;
+        const assumedMZ = this.expMZ() - this.missingPeaks() * SpectrumMatch.C13_MASS_DIFFERENCE / this.precursorCharge;
         const errorMZ = assumedMZ - this.calcMZ();
         return errorMZ / this.calcMZ() * 1000000;
     }
