@@ -1,27 +1,43 @@
-CLMS.model.CrossLink = function(id, fromProtein, fromResidue, toProtein, toResidue) {
-    this.id = id;
-    this.matches_pp = [];
-    this.filteredMatches_pp = [];
+export class Crosslink {
+    constructor(id, fromProtein, fromResidue, toProtein, toResidue) {
+        this.id = id;
+        this.matches_pp = [];
+        this.filteredMatches_pp = [];
 
-    this.fromProtein = fromProtein;
-    this.fromResidue = fromResidue;
-    this.toProtein = toProtein;
-    this.toResidue = toResidue;
-};
+        this.fromProtein = fromProtein;
+        this.fromResidue = fromResidue;
+        this.toProtein = toProtein;
+        this.toResidue = toResidue;
+    }
 
-CLMS.model.CrossLink.prototype.isDecoyLink = function() {
-    return (this.fromProtein.is_decoy === true ||
-        (this.toProtein && this.toProtein.is_decoy === true));
-};
+    isDecoyLink() {
+        return (this.fromProtein.is_decoy === true ||
+            (this.toProtein && this.toProtein.is_decoy === true));
+    }
 
-CLMS.model.CrossLink.prototype.isSelfLink = function() {
-    return this.fromProtein && this.toProtein && this.fromProtein.targetProteinID === this.toProtein.targetProteinID; // mjg
-};
+    isSelfLink() {
+        return this.fromProtein && this.toProtein && this.fromProtein.targetProteinID === this.toProtein.targetProteinID; // mjg
+    }
 
-CLMS.model.CrossLink.prototype.isLinearLink = function() {
-    return this.matches_pp[0].match.isLinear();
-};
+    isLinearLink() {
+        return this.matches_pp[0].match.isLinear();
+    }
 
-CLMS.model.CrossLink.prototype.isMonoLink = function() {
-    return this.matches_pp[0].match.isMonoLink();
-};
+    isMonoLink () {
+        return this.matches_pp[0].match.isMonoLink();
+    }
+
+    getMeta (metaField) {
+        if (arguments.length === 0) {
+            return this.meta;
+        }
+        return this.meta ? this.meta[metaField] : undefined;
+    };
+
+    setMeta (metaField, value) {
+        if (arguments.length === 2) {
+            this.meta = this.meta || {};
+            this.meta[metaField] = value;
+        }
+    }
+}

@@ -1,10 +1,15 @@
-var CLMS = CLMS || {};
+import Backbone from "backbone";
 
-CLMS.model = CLMS.model || {};
+import {SpectrumMatch} from "./spectrum-match";
 
-CLMS.model.SearchResultsModel = Backbone.Model.extend({
+export class SearchResultsModel extends Backbone.Model {
+
+    constructor() {
+        super();
+    }
+
     //http://stackoverflow.com/questions/19835163/backbone-model-collection-property-not-empty-on-new-model-creation
-    defaults: function() {
+    defaults() {
         return {
             participants: new Map(), //map
             matches: [],
@@ -16,16 +21,10 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             manualValidatedPresent: false,
             unvalidatedPresent: false
         };
-    },
-
-    commonRegexes: {
-        uniprotAccession: /[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}/,
-        notUpperCase: /[^A-Z]/g,
-        decoyNames: /(REV_)|(RAN_)|(DECOY_)|(DECOY:)|(reverse_)/,
-    },
+    }
 
     //our SpectrumMatches are constructed from the rawMatches and peptides arrays in this json
-    parseJSON: function(json) {
+    parseJSON(json) {
         if (json) {
             const self = this;
             this.set("sid", json.sid);
@@ -127,7 +126,7 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             for (let search of searches.values()) {
                 const crosslinkers = search.crosslinkers || [];
 
-                crosslinkers.forEach(function(crosslinker) {
+                crosslinkers.forEach(function (crosslinker) {
                     const crosslinkerDescription = crosslinker.description;
                     const crosslinkerName = crosslinker.name;
                     const linkedAARegex = /LINKEDAMINOACIDS:(.*?)(?:;|$)/g; // capture both sets if > 1 set
@@ -153,7 +152,7 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
                         }
 
                         const resArray = result[1].split(',');
-                        resArray.forEach(function(res) {
+                        resArray.forEach(function (res) {
                             const resRegex = /(cterm|nterm|[A-Z])(.*)?/i;
                             const resMatch = resRegex.exec(res);
                             if (resMatch) {
@@ -164,7 +163,7 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
                     }
 
                     if (i === 0) {
-                        resSet.linkables.push (new Set(["*"]));  // in case non-covalent
+                        resSet.linkables.push(new Set(["*"]));  // in case non-covalent
                     }
 
                     resSet.heterobi = resSet.heterobi || (i > 1);
@@ -213,9 +212,9 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
                 const pepCount = peptideArray.length;
                 let peptide;
                 for (let pep = 0; pep < pepCount; pep++) {
-                    this.commonRegexes.notUpperCase.lastIndex = 0;
+                    SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
                     peptide = peptideArray[pep];
-                    peptide.sequence = peptide.seq_mods.replace(this.commonRegexes.notUpperCase, '');
+                    peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, '');
                     peptides.set(peptide.id, peptide);
                 }
             }
@@ -229,7 +228,7 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             // moved from modelUtils 05/08/19
             // Connect searches to proteins, and add the protein set as a property of a search in the clmsModel, MJG 17/05/17
             const searchMap = this.getProteinSearchMap(json.peptides, json.rawMatches || json.identifications);
-            this.get("searches").forEach(function(value, key) {
+            this.get("searches").forEach(function (value, key) {
                 value.participantIDSet = searchMap[key];
             });
 
@@ -246,14 +245,14 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
 
                     if (rawMatch.ty.length === undefined) {
                         if ((i < (l - 1)) && rawMatch.id === rawMatches[i + 1].id) {
-                            rawMatchArray.push (rawMatches[i + 1]);
+                            rawMatchArray.push(rawMatches[i + 1]);
                             i++;
                         }
                     } else {
                         const size = rawMatch.ty.length;
                         if (size > 1) {
                             for (let j = 1; j < size; j++) {
-                                rawMatchArray.push ({pi: rawMatch.pi[j], lp: rawMatch.lp[j]});
+                                rawMatchArray.push({pi: rawMatch.pi[j], lp: rawMatch.lp[j]});
                             }
                         }
                         rawMatch.ty = rawMatch.ty[0];
@@ -262,7 +261,7 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
                         //rawMatch.cl = rawMatch.cl[0]; // PHP/SQL now returns crosslinker_id as single value, not array
                     }
 
-                    match = new CLMS.model.SpectrumMatch(this, participants, crossLinks, peptides, rawMatchArray);
+                    match = new SpectrumMatch(this, participants, crossLinks, peptides, rawMatchArray);
                     matches.push(match);
 
                     if (maxScore === undefined || match.score() > maxScore) {
@@ -283,24 +282,24 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             });
 
             for (let participant of targetParticipantArray) {
-                participant.uniprot  = json.interactors ? json.interactors[participant.accession.split('-')[0]] : null;
+                participant.uniprot = json.interactors ? json.interactors[participant.accession.split('-')[0]] : null;
             }
 
             CLMSUI.vent.trigger("uniprotDataParsed", self);
         }
 
-    },
+    }
 
     // Connect searches to proteins
-    getProteinSearchMap: function(peptideArray, rawMatchArray) {
+    getProteinSearchMap(peptideArray, rawMatchArray) {
         const pepMap = d3.map(peptideArray, function (peptide) {
             return peptide.id;
         });
         const searchMap = {};
         rawMatchArray = rawMatchArray || [];
-        rawMatchArray.forEach(function(rawMatch) {
+        rawMatchArray.forEach(function (rawMatch) {
             const peptideIDs = rawMatch.pi ? rawMatch.pi : [rawMatch.pi1, rawMatch.pi2];
-            peptideIDs.forEach (function (pepID) {
+            peptideIDs.forEach(function (pepID) {
                 if (pepID) {
                     const prots = pepMap.get(pepID).prt;
                     let searchToProts = searchMap[rawMatch.si];
@@ -309,20 +308,20 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
                         searchMap[rawMatch.si] = newSet;
                         searchToProts = newSet;
                     }
-                    prots.forEach(function(prot) {
+                    prots.forEach(function (prot) {
                         searchToProts.add(prot);
                     });
                 }
             });
         });
         return searchMap;
-    },
+    }
 
     //adds some attributes we want to protein object
-    initProtein: function(protObj) {
+    initProtein(protObj) {
         if (protObj.seq_mods) {
-            this.commonRegexes.notUpperCase.lastIndex = 0;
-            protObj.sequence = protObj.seq_mods.replace(this.commonRegexes.notUpperCase, '');
+            SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
+            protObj.sequence = protObj.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, '');
         }
         if (protObj.sequence) protObj.size = protObj.sequence.length;
         if (!protObj.crossLinks) {
@@ -349,9 +348,9 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
                 this.meta[metaField] = value;
             }
         }.bind(protObj);
-    },
+    }
 
-    getDigestibleResiduesAsFeatures: function(participant) {
+    getDigestibleResiduesAsFeatures(participant) {
         const digestibleResiduesAsFeatures = [];
 
         const sequence = participant.sequence;
@@ -379,9 +378,9 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
         }
         //console.log("sp:", specificity, "df:", digestibleResiduesAsFeatures);
         return digestibleResiduesAsFeatures;
-    },
+    }
 
-    getCrosslinkableResiduesAsFeatures: function(participant, reactiveGroup) {
+    getCrosslinkableResiduesAsFeatures(participant, reactiveGroup) {
         const crosslinkableResiduesAsFeatures = [];
 
         const sequence = participant.sequence;
@@ -421,15 +420,15 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
 
         console.log("reactiveGroup:", reactiveGroup, "sp:", linkedResSets, "clf:", crosslinkableResiduesAsFeatures);
         return crosslinkableResiduesAsFeatures;
-    },
+    }
 
-    initDecoyLookup: function(prefixes) {
+    initDecoyLookup(prefixes) {
         // Make map of reverse/random decoy proteins to real proteins
         prefixes = prefixes || ["REV_", "RAN_", "DECOY_", "DECOY:", "reverse_", "REV", "RAN"];
         const prots = Array.from(this.get("participants").values());
         const nameMap = d3.map();
         const accessionMap = d3.map();
-        prots.forEach(function(prot) {
+        prots.forEach(function (prot) {
             nameMap.set(prot.name, prot.id);
             accessionMap.set(prot.accession, prot.id);
             prot.targetProteinID = prot.id; // this gets overwritten for decoys in next bit, mjg
@@ -439,13 +438,13 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             return p.is_decoy;
         });
 
-        decoys.forEach(function(decoyProt) {
-            prefixes.forEach(function(pre) {
+        decoys.forEach(function (decoyProt) {
+            prefixes.forEach(function (pre) {
                 const targetProtIDByName = nameMap.get(decoyProt.name.substring(pre.length));
                 if (decoyProt.accession) {
                     const targetProtIDByAccession = accessionMap.get(decoyProt.accession.substring(pre.length));
                     if ( /*targetProtIDByName && */ targetProtIDByAccession) {
-                        decoyProt.targetProteinID = targetProtIDByAccession /*targetProtIDByName*/ ; // mjg
+                        decoyProt.targetProteinID = targetProtIDByAccession /*targetProtIDByName*/; // mjg
                     }
                 } else if (targetProtIDByName) {
                     decoyProt.targetProteinID = targetProtIDByName; // mjg
@@ -454,34 +453,36 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
         });
 
         this.targetProteinCount = prots.length - decoys.length;
-    },
+    }
 
-    isMatchingProteinPair: function(prot1, prot2) {
+    isMatchingProteinPair(prot1, prot2) {
         return prot1 && prot2 && prot1.targetProteinID === prot2.targetProteinID;
-    },
-/*
-    isMatchingProteinPairFromIDs: function(prot1ID, prot2ID) {
-        if (prot1ID === prot2ID) {
-            return true;
-        }
-        const participants = this.get("participants");
-        const prot1 = participants.get(prot1ID);
-        const prot2 = participants.get(prot2ID);
-        return this.isMatchingProteinPair(prot1, prot2);
-    },
-*/
-    isSelfLink: function(crossLink) {
-        return crossLink.isSelfLink();
-    },
+    }
 
-    getSearchRandomId: function(match) {
+    /*
+        isMatchingProteinPairFromIDs: function(prot1ID, prot2ID) {
+            if (prot1ID === prot2ID) {
+                return true;
+            }
+            const participants = this.get("participants");
+            const prot1 = participants.get(prot1ID);
+            const prot2 = participants.get(prot2ID);
+            return this.isMatchingProteinPair(prot1, prot2);
+        },
+    */
+    isSelfLink(crossLink) {
+        return crossLink.isSelfLink();
+    }
+
+    getSearchRandomId(match) {
         const searchId = match.searchId;
         const searchMap = this.get("searches");
         const searchData = searchMap.get(searchId);
         return searchData.random_id;
-    },
+    }
+}
 
-    attributeOptions: [{
+SearchResultsModel.attributeOptions = [{
             linkFunc: function(link) {
                 return [link.filteredMatches_pp.length];
             },
@@ -738,6 +739,10 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             decimalPlaces: 0,
             matchLevel: true
         },
-    ],
+    ]
 
-});
+SearchResultsModel.commonRegexes = {
+    uniprotAccession: /[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}/,
+    notUpperCase: /[^A-Z]/g,
+    decoyNames: /(REV_)|(RAN_)|(DECOY_)|(DECOY:)|(reverse_)/,
+}
