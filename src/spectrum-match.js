@@ -396,7 +396,7 @@ export class SpectrumMatch {
         const clCount = crosslinkers.length;
         for (let c = 0; c < clCount; c++) {
             const crosslinker = crosslinkers[c];
-            if (crosslinker.id == this.crosslinker_id) {
+            if (crosslinker.id == this.crosslinker_id) { // yes, they're different types
                 return crosslinker;
             }
         }
