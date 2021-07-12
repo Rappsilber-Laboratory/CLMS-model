@@ -86,6 +86,9 @@ export class SpectrumMatch {
             this.linkPos2 = +rawMatches[1].lp;
         }
 
+        // the protein IDs and residue numers we eventually want to get:-
+        let p1ID, p2ID, res1, res2;
+
         if (this.linkPos1 === 0) { //would have been -1 in DB but 1 was added to it during query
             //its a linear
             this.containingModel.set("linearsPresent", true);
@@ -104,9 +107,6 @@ export class SpectrumMatch {
 
         this.couldBelongToBetweenLink = false;
         this.couldBelongToSelfLink = false;
-
-        // the protein IDs and residue numers we eventually want to get:-
-        let p1ID, p2ID, res1, res2;
 
         //loop to produce all alternative linkage site combinations
         //(position1 count * position2 count alternative)
