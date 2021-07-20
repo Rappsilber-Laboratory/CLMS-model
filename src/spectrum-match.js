@@ -530,7 +530,5 @@ export class SpectrumMatch {
     }
 }
 
-SpectrumMatch.dupScans = new Map();
-SpectrumMatch.dupCount = 0;
 SpectrumMatch.protonMass = 1.007276466879;
 SpectrumMatch.C13_MASS_DIFFERENCE = 1.0033548;

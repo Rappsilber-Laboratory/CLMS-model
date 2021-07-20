@@ -323,7 +323,11 @@ export class SearchResultsModel extends Backbone.Model {
             SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
             protObj.sequence = protObj.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, '');
         }
-        if (protObj.sequence) protObj.size = protObj.sequence.length;
+        if (protObj.sequence) {
+            protObj.size = protObj.sequence.length;
+        } else {
+            protObj.size = 1;
+        }
         if (!protObj.crosslinks) {
             protObj.crosslinks = [];
         }
