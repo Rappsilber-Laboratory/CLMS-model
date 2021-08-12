@@ -41,6 +41,13 @@ if (count($_GET) > 0) {
         }
     }
 
+    $passingOnly = false;
+    if (isset($_GET['passingOnly'])) {
+        if ($_GET['passingOnly'] === '1' || $_GET['passingOnly'] === '0') {
+            $passingOnly = (bool) $_GET['passingOnly'];
+        }
+    }
+
     $matchid = '';
     if (isset($_GET['matchid'])) {
         $matchid = (string) $_GET['matchid'];
@@ -154,6 +161,9 @@ if (count($_GET) > 0) {
         $query = $query. "spectrum_id = ".$spectrumId;
     } else {
         $query = $query. "rank = 1";
+    }
+    if ($passingOnly) {
+        $query = $query. "AND pass_threshold";
     }
     # $query = $query. " ORDER BY scores->>'xi:score' DESC";
     $startTime = microtime(true);
