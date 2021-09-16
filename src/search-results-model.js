@@ -1,4 +1,5 @@
-import Backbone from "backbone";
+import * as d3 from "d3";
+import * as Backbone from "backbone";
 
 import {SpectrumMatch} from "./spectrum-match";
 
