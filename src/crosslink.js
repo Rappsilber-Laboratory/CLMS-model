@@ -32,7 +32,7 @@ export class Crosslink {
             return this.meta;
         }
         return this.meta ? this.meta[metaField] : undefined;
-    };
+    }
 
     setMeta (metaField, value) {
         if (arguments.length === 2) {

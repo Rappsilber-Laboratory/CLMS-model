@@ -40,12 +40,12 @@ export class SearchResultsModel extends Backbone.Model {
 
             const getResiduesFromEnzymeDescription = function (regexMatch, residueSet) {
                 if (regexMatch && regexMatch.length > 1) {
-                    const resArray = regexMatch[1].split(',');
+                    const resArray = regexMatch[1].split(",");
                     const resCount = resArray.length;
                     for (let r = 0; r < resCount; r++) {
                         residueSet.add({
                             aa: resArray[r],
-                            postConstraint: regexMatch[2] ? regexMatch[2].split(',') : null
+                            postConstraint: regexMatch[2] ? regexMatch[2].split(",") : null
                         });
                     }
                 }
@@ -152,7 +152,7 @@ export class SearchResultsModel extends Backbone.Model {
                             resSet.linkables[i] = new Set();
                         }
 
-                        const resArray = result[1].split(',');
+                        const resArray = result[1].split(",");
                         resArray.forEach(function (res) {
                             const resRegex = /(cterm|nterm|[A-Z])(.*)?/i;
                             const resMatch = resRegex.exec(res);
@@ -215,7 +215,7 @@ export class SearchResultsModel extends Backbone.Model {
                 for (let pep = 0; pep < pepCount; pep++) {
                     SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
                     peptide = peptideArray[pep];
-                    peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, '');
+                    peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
                     peptides.set(peptide.id, peptide);
                 }
             }
@@ -283,7 +283,7 @@ export class SearchResultsModel extends Backbone.Model {
             });
 
             for (let participant of targetParticipantArray) {
-                participant.uniprot = json.interactors ? json.interactors[participant.accession.split('-')[0]] : null;
+                participant.uniprot = json.interactors ? json.interactors[participant.accession.split("-")[0]] : null;
             }
 
             window.vent.trigger("uniprotDataParsed", self); // todo - get rid
@@ -322,7 +322,7 @@ export class SearchResultsModel extends Backbone.Model {
     initProtein(protObj) {
         if (protObj.seq_mods) {
             SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
-            protObj.sequence = protObj.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, '');
+            protObj.sequence = protObj.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
         }
         if (protObj.sequence) {
             protObj.size = protObj.sequence.length;
@@ -338,7 +338,7 @@ export class SearchResultsModel extends Backbone.Model {
 
         //take out organism abbreviation after underscore from names
         if (protObj.name.indexOf("_") !== -1) {
-            protObj.name = protObj.name.substring(0, protObj.name.indexOf("_"))
+            protObj.name = protObj.name.substring(0, protObj.name.indexOf("_"));
         }
         protObj.getMeta = function(metaField) {
             if (arguments.length === 0) {
@@ -449,7 +449,7 @@ export class SearchResultsModel extends Backbone.Model {
                 if (decoyProt.accession) {
                     const targetProtIDByAccession = accessionMap.get(decoyProt.accession.substring(pre.length));
                     if ( /*targetProtIDByName && */ targetProtIDByAccession) {
-                        decoyProt.targetProteinID = targetProtIDByAccession /*targetProtIDByName*/; // mjg
+                        decoyProt.targetProteinID = targetProtIDByAccession; // mjg
                     }
                 } else if (targetProtIDByName) {
                     decoyProt.targetProteinID = targetProtIDByName; // mjg
@@ -487,7 +487,9 @@ export class SearchResultsModel extends Backbone.Model {
     }
 }
 
-SearchResultsModel.attributeOptions = [{
+SearchResultsModel.attributeOptions = 
+    [
+        {
             linkFunc: function(link) {
                 return [link.filteredMatches_pp.length];
             },
@@ -744,10 +746,10 @@ SearchResultsModel.attributeOptions = [{
             decimalPlaces: 0,
             matchLevel: true
         },
-    ]
+    ];
 
 SearchResultsModel.commonRegexes = {
     uniprotAccession: /[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}/,
     notUpperCase: /[^A-Z]/g,
     decoyNames: /(REV_)|(RAN_)|(DECOY_)|(DECOY:)|(reverse_)/,
-}
+};

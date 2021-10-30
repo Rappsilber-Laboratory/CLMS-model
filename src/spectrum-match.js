@@ -26,7 +26,7 @@ export class SpectrumMatch {
         this.searchId = rawMatches[0].si.toString();
         this.crosslinker_id = rawMatches[0].cl;
         if (rawMatches[0].dc) {
-            this.is_decoy = (rawMatches[0].dc === 't');
+            this.is_decoy = (rawMatches[0].dc === "t");
         }
         if (this.is_decoy === true) {
             this.containingModel.set("decoysPresent", true);
@@ -177,7 +177,7 @@ export class SpectrumMatch {
     }
 
     associateWithLink(proteins, crosslinks, p1ID, p2ID, res1, res2, //following params may be null :-
-                      pep1_start, pep1_length, pep2_start, pep2_length) {
+        pep1_start, pep1_length, pep2_start, pep2_length) {
 
         // we don't want two different ID's, e.g. one thats "33-66" and one thats "66-33"
         //following puts lower protein_ID first in link_ID
@@ -186,7 +186,7 @@ export class SpectrumMatch {
 
         let fromProt, toProt;
 
-        if (!p2ID || p2ID === "" || p2ID === '-' || p2ID === 'n/a') { //its  a linear peptide (no crosslinker of any product type))
+        if (!p2ID || p2ID === "" || p2ID === "-" || p2ID === "n/a") { //its  a linear peptide (no crosslinker of any product type))
             this.containingModel.set("linearsPresent", true);
             fromProt = proteins.get(p1ID);
             if (!fromProt) {
@@ -239,7 +239,7 @@ export class SpectrumMatch {
 
         //get or create residue link
         let resLink = crosslinks.get(crosslinkID);
-        if (typeof resLink == 'undefined') {
+        if (typeof resLink == "undefined") {
             //to and from proteins were already swapped over above
 
             //WATCH OUT - residues need to be in correct order
@@ -252,9 +252,7 @@ export class SpectrumMatch {
                 } else {
                     resLink = new Crosslink(crosslinkID, fromProt, res2, toProt, res1, this.containingModel);
                 }
-            }
-            //
-            else if (p1ID === fromProt.id) {
+            } else if (p1ID === fromProt.id) {
                 resLink = new Crosslink(crosslinkID, fromProt, res1, toProt, res2, this.containingModel);
             } else {
                 //WATCH OUT - residues need to be in correct oprder
@@ -396,7 +394,7 @@ export class SpectrumMatch {
         const clCount = crosslinkers.length;
         for (let c = 0; c < clCount; c++) {
             const crosslinker = crosslinkers[c];
-            if (crosslinker.id == this.crosslinker_id) { // yes, they're different types
+            if (crosslinker.id == this.crosslinker_id) { // yes, they're different types, don't ===
                 return crosslinker;
             }
         }
@@ -406,7 +404,7 @@ export class SpectrumMatch {
         const search = this.containingModel.get("searches").get(this.searchId);
         return {
             "tolerance": search.ms2tolerance,
-            'unit': search.ms2toleranceunits
+            "unit": search.ms2toleranceunits
         };
     }
 
