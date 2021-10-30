@@ -340,14 +340,14 @@ export class SearchResultsModel extends Backbone.Model {
         if (protObj.name.indexOf("_") !== -1) {
             protObj.name = protObj.name.substring(0, protObj.name.indexOf("_"));
         }
-        protObj.getMeta = function(metaField) {
+        protObj.getMeta = function (metaField) {
             if (arguments.length === 0) {
                 return this.meta;
             }
             return this.meta ? this.meta[metaField] : undefined;
         }.bind(protObj);
 
-        protObj.setMeta = function(metaField, value) {
+        protObj.setMeta = function (metaField, value) {
             if (arguments.length === 2) {
                 this.meta = this.meta || {};
                 this.meta[metaField] = value;
@@ -487,13 +487,13 @@ export class SearchResultsModel extends Backbone.Model {
     }
 }
 
-SearchResultsModel.attributeOptions = 
+SearchResultsModel.attributeOptions =
     [
         {
-            linkFunc: function(link) {
+            linkFunc: function (link) {
                 return [link.filteredMatches_pp.length];
             },
-            unfilteredLinkFunc: function(link) {
+            unfilteredLinkFunc: function (link) {
                 return [link.matches_pp.length];
             },
             id: "MatchCount",
@@ -501,13 +501,13 @@ SearchResultsModel.attributeOptions =
             decimalPlaces: 0
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.score();
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.score();
                 });
             },
@@ -517,13 +517,13 @@ SearchResultsModel.attributeOptions =
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
+            linkFunc: function (link) {
                 const scores = link.filteredMatches_pp.map(function (m) {
                     return m.match.score();
                 });
                 return [Math.max.apply(Math, scores)];
             },
-            unfilteredLinkFunc: function(link) {
+            unfilteredLinkFunc: function (link) {
                 const scores = link.matches_pp.map(function (m) {
                     return m.match.score();
                 });
@@ -535,13 +535,13 @@ SearchResultsModel.attributeOptions =
             matchLevel: false
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.precursorMZ;
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.precursorMZ;
                 });
             },
@@ -551,13 +551,13 @@ SearchResultsModel.attributeOptions =
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.precursorCharge;
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.precursorCharge;
                 });
             },
@@ -567,13 +567,13 @@ SearchResultsModel.attributeOptions =
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.calcMass();
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.calcMass();
                 });
             },
@@ -583,13 +583,13 @@ SearchResultsModel.attributeOptions =
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.massError();
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.massError();
                 });
             },
@@ -599,13 +599,13 @@ SearchResultsModel.attributeOptions =
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.missingPeaks();
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.missingPeaks();
                 });
             },
@@ -615,13 +615,13 @@ SearchResultsModel.attributeOptions =
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return Math.min(m.pepPos[0].length, m.pepPos[1].length);
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return Math.min(m.pepPos[0].length, m.pepPos[1].length);
                 });
             },
@@ -631,14 +631,14 @@ SearchResultsModel.attributeOptions =
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     const p = m.match.precursor_intensity;
                     return isNaN(p) ? undefined : p;
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     const p = m.match.precursor_intensity;
                     return isNaN(p) ? undefined : p;
                 });
@@ -652,13 +652,13 @@ SearchResultsModel.attributeOptions =
             logStart: 1000
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.elution_time_start;
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.elution_time_start;
                 });
             },
@@ -668,13 +668,13 @@ SearchResultsModel.attributeOptions =
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.elution_time_end;
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.elution_time_end;
                 });
             },
@@ -685,11 +685,11 @@ SearchResultsModel.attributeOptions =
         },
         {
             //watch out for the 'this' reference
-            linkFunc: function(link) {
+            linkFunc: function (link) {
                 //return link.isLinearLink() ? [] : [this.model.getSingleCrosslinkDistance(link, null, null, option)];
                 return link.isLinearLink() ? [] : [link.getMeta("distance")];
             },
-            unfilteredLinkFunc: function(link) {
+            unfilteredLinkFunc: function (link) {
                 //return link.isLinearLink() ? [] : [this.model.getSingleCrosslinkDistance(link, null, null, option)];
                 return link.isLinearLink() ? [] : [link.getMeta("distance")];
             },
@@ -699,13 +699,13 @@ SearchResultsModel.attributeOptions =
             maxVal: 90,
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.experimentalMissedCleavageCount();
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.experimentalMissedCleavageCount();
                 });
             },
@@ -715,13 +715,13 @@ SearchResultsModel.attributeOptions =
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.searchMissedCleavageCount();
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.searchMissedCleavageCount();
                 });
             },
@@ -731,13 +731,13 @@ SearchResultsModel.attributeOptions =
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.modificationCount();
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.modificationCount();
                 });
             },

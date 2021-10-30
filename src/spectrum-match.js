@@ -335,11 +335,11 @@ export class SpectrumMatch {
         return this.precursorMZ * this.precursorCharge - (this.precursorCharge * SpectrumMatch.protonMass);
     }
 
-    calcMZ () {
+    calcMZ() {
         return (this.calc_mass + (this.precursorCharge * SpectrumMatch.protonMass)) / this.precursorCharge;
     }
 
-    calcMass () {
+    calcMass() {
         return this.calc_mass;
     }
 
@@ -350,7 +350,7 @@ export class SpectrumMatch {
         return Math.round(errorM / SpectrumMatch.C13_MASS_DIFFERENCE);
     }
 
-    massError () {
+    massError() {
         //old
         //return ((this.expMass() - this.calcMass()) / this.calcMass()) * 1000000;
 
@@ -361,11 +361,11 @@ export class SpectrumMatch {
         return errorMZ / this.calcMZ() * 1000000;
     }
 
-    ionTypes  () {
+    ionTypes() {
         return this.containingModel.get("searches").get(this.searchId).ionTypes;
     }
 
-    ionTypesString () {
+    ionTypesString() {
         const ions = this.ionTypes();
         let returnString = "";
         for (let i = 0; i < ions.length; i++) {
@@ -378,14 +378,14 @@ export class SpectrumMatch {
         return returnString;
     }
 
-    crosslinkerModMass () {
+    crosslinkerModMass() {
         const crosslinker = this.getCrossLinker();
         if (crosslinker) {
             return crosslinker.mass;
         } else return 0;
     }
 
-    getCrossLinker () {
+    getCrossLinker() {
         if (this.crosslinker_id === -1) {
             return null;
         }
@@ -400,7 +400,7 @@ export class SpectrumMatch {
         }
     }
 
-    fragmentTolerance () {
+    fragmentTolerance() {
         const search = this.containingModel.get("searches").get(this.searchId);
         return {
             "tolerance": search.ms2tolerance,
@@ -408,16 +408,16 @@ export class SpectrumMatch {
         };
     }
 
-    fragmentToleranceString () {
+    fragmentToleranceString() {
         const search = this.containingModel.get("searches").get(this.searchId);
         return search.ms2tolerance + " " + search.ms2toleranceunits;
     }
 
-    score () {
+    score() {
         return this._score;
     }
 
-    experimentalMissedCleavageCount () {
+    experimentalMissedCleavageCount() {
         const enzymeSpecificity = this.containingModel.get("enzymeSpecificity");
 
         //yes... this should prob be done with regex

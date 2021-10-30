@@ -23,18 +23,18 @@ export class Crosslink {
         return this.matches_pp[0].match.isLinear();
     }
 
-    isMonoLink () {
+    isMonoLink() {
         return this.matches_pp[0].match.isMonoLink();
     }
 
-    getMeta (metaField) {
+    getMeta(metaField) {
         if (arguments.length === 0) {
             return this.meta;
         }
         return this.meta ? this.meta[metaField] : undefined;
     }
 
-    setMeta (metaField, value) {
+    setMeta(metaField, value) {
         if (arguments.length === 2) {
             this.meta = this.meta || {};
             this.meta[metaField] = value;
