@@ -685,11 +685,11 @@ SearchResultsModel.attributeOptions =
         },
         {
             //watch out for the 'this' reference
-            linkFunc: function(link, option) {
+            linkFunc: function(link) {
                 //return link.isLinearLink() ? [] : [this.model.getSingleCrosslinkDistance(link, null, null, option)];
                 return link.isLinearLink() ? [] : [link.getMeta("distance")];
             },
-            unfilteredLinkFunc: function(link, option) {
+            unfilteredLinkFunc: function(link) {
                 //return link.isLinearLink() ? [] : [this.model.getSingleCrosslinkDistance(link, null, null, option)];
                 return link.isLinearLink() ? [] : [link.getMeta("distance")];
             },
