@@ -1,89 +1,35 @@
-//      CLMS-model
-//      Copyright 2015 Rappsilber Laboratory, Edinburgh University
-//
-//      authors: Colin Combe, Martin Graham
-//
-//      SearchResultsModel.js
+import * as d3 from "d3";
+import * as Backbone from "backbone";
 
+import {SpectrumMatch} from "./spectrum-match";
 
-var CLMS = CLMS || {};
+export class SearchResultsModel extends Backbone.Model {
 
-//For IE, which doesn't yet support values(). entries(), or keys() on ECMA6 Map
-CLMS.arrayFromMapValues = function(map) {
-    if (map.values && Array.from) {
-        return Array.from(map.values());
-    } else {
-        var array = [];
-        map.forEach(function(value, key, map) {
-            array.push(value);
-        });
-        return array;
+    constructor(attributes, options) {
+        super(attributes, options);
     }
-};
 
-CLMS.arrayFromMapEntries = function(map) {
-    if (map.entries && Array.from) {
-        return Array.from(map.entries());
-    } else {
-        var array = [];
-        map.forEach(function(value, key, map) {
-            array.push([key, value])
-        });
-        return array;
-    }
-};
-
-CLMS.arrayFromMapKeys = function(map) {
-    if (map.keys && Array.from) {
-        return Array.from(map.keys());
-    } else {
-        var array = [];
-        map.forEach(function(value, key, map) {
-            array.push(key)
-        });
-        return array;
-    }
-};
-
-CLMS.removeDomElement = function(child) {
-    if (child && child.parentNode) {
-        child.parentNode.removeChild(child);
-    }
-};
-
-CLMS.model = CLMS.model || {};
-
-CLMS.model.SearchResultsModel = Backbone.Model.extend({
     //http://stackoverflow.com/questions/19835163/backbone-model-collection-property-not-empty-on-new-model-creation
-    defaults: function() {
+    defaults() {
         return {
             participants: new Map(), //map
             matches: [],
-            crossLinks: new Map(), //map
+            crosslinks: new Map(), //map
             scoreExtent: null,
             searches: new Map(),
             decoysPresent: false,
             ambiguousPresent: false,
-            crossLinksPresent: false,
+            crosslinksPresent: false,
             linearsPresent: false, // TODO
             scoreSets: new Set(),
             selectedScoreSet: null
         };
-    },
-
-    commonRegexes: {
-        uniprotAccession: /^[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}/,
-        notUpperCase: /[^A-Z]/g,
-        decoyNames: /(REV_)|(RAN_)|(DECOY_)|(DECOY:)|(reverse_)/,
-    },
+    }
 
     //our SpectrumMatches are constructed from the rawMatches and peptides arrays in this json
-    parseJSON: function(json) {
+    parseJSON(json) {
         if (json) {
-
-            CLMSUI.loggedIn = json.loggedIn;
-
-            var self = this;
+            const self = this;
             this.set("sid", json.sid);
 
             //modifications
@@ -92,7 +38,7 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             for (var m = 0; m < modCount; m++) {
                 var mod = json.modifications[m];
                 modifications.push({
-                    aminoAcids: mod.residues.split(''),
+                    aminoAcids: mod.residues.split(""),
                     id: mod.mod_name,
                     mass: mod.mass
                 });
@@ -100,9 +46,9 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             this.set("modifications", modifications);
 
             //search meta data
-            var searches = new Map();
-            for (var propertyName in json.searches) {
-                var search = json.searches[propertyName];
+            const searches = new Map();
+            for (let propertyName in json.searches) {
+                const search = json.searches[propertyName];
                 searches.set(propertyName, search);
             }
             this.set("searches", searches);
@@ -202,7 +148,7 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             var specCount = json.spectra.length;
             for (var sp = 0; sp < specCount; sp++) {
                 specSource = json.spectra[sp];
-                spectrumSources.set(specSource.up_id + '_' + specSource.id, specSource);
+                spectrumSources.set(specSource.up_id + "_" + specSource.id, specSource);
             }
             this.set("spectrumSources", spectrumSources);
 
@@ -226,29 +172,29 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
                 var pepCount = peptideArray.length;
                 var peptide;
                 for (var pep = 0; pep < pepCount; pep++) {
-                    this.commonRegexes.notUpperCase.lastIndex = 0;
+                    SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
                     peptide = peptideArray[pep];
-                    peptide.sequence = peptide.seq_mods.replace(this.commonRegexes.notUpperCase, '');
+                    peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
                     peptides.set(peptide.u_id + "_" + peptide.id, peptide); // concat upload_id and peptide.id
 
                     for (var p = 0; p < peptide.prt.length; p++) {
                         if (peptide.is_decoy[p]) {
-                              participants.get(peptide.prt[p]).is_decoy = true;
-                              this.set("decoysPresent", true);
+                            participants.get(peptide.prt[p]).is_decoy = true;
+                            this.set("decoysPresent", true);
                         }
                     }
                 }
             }
 
-            var crossLinks = this.get("crossLinks");
+            var crosslinks = this.get("crosslinks");
 
             var minScore = undefined;
             var maxScore = undefined;
 
             // moved from modelUtils 05/08/19
             // Connect searches to proteins, and add the protein set as a property of a search in the clmsModel, MJG 17/05/17
-            var searchMap = this.getProteinSearchMap (json.peptides, json.rawMatches || json.identifications);
-            this.get("searches").forEach(function(value, key) {
+            var searchMap = this.getProteinSearchMap(json.peptides, json.rawMatches || json.identifications);
+            this.get("searches").forEach(function (value, key) {
                 value.participantIDSet = searchMap[key];
             });
 
@@ -257,7 +203,7 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
 
                 var l = json.identifications.length;
                 for (var i = 0; i < l; i++) {
-                    var match = new CLMS.model.SpectrumMatch(this, participants, crossLinks, peptides, json.identifications[i]);
+                    var match = new SpectrumMatch(this, participants, crosslinks, peptides, json.identifications[i]);
 
                     matches.push(match);
 
@@ -274,104 +220,63 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             this.set("minScore", minScore);
             this.set("maxScore", maxScore);
 
-            var participantArray = CLMS.arrayFromMapValues(participants);
+            const participantArray = Array.from(participants.values());
             // only count real participants towards participant count (which is used as cut-off further on)
-            var targetParticipantArray = participantArray.filter(function(p) {
+            const targetParticipantArray = participantArray.filter(function (p) {
                 return !p.is_decoy;
             });
-            var participantCount = targetParticipantArray.length;
 
-            for (var p = 0; p < participantCount; p++) {
-                var participant = targetParticipantArray[p];
-                var uniprot = json.interactors ? json.interactors[participant.accession] : null;
-                participant.uniprot = uniprot;
+            for (let participant of targetParticipantArray) {
+                participant.uniprot = json.interactors ? json.interactors[participant.accession.split("-")[0]] : null;
             }
 
-            CLMSUI.vent.trigger("uniprotDataParsed", self);
-
-
-            /*
-                            function processUniProtTxt(p, json){
-                                p.uniprot = json;
-                                participantCount--;
-                                if (participantCount === 0) {
-                                    CLMSUI.vent.trigger("uniprotDataParsed", self);
-                                }
-                            }
-
-                            function uniProtTxt (p){
-                                self.commonRegexes.uniprotAccession.lastIndex = 0;
-                                var regexMatch = self.commonRegexes.uniprotAccession.exec(p.accession);
-                                if (!p.is_decoy && regexMatch) {
-                                    var url = "https://www.ebi.ac.uk/proteins/api/features/" + regexMatch[0] + ".json";
-                                    d3.json(url, function (json) {
-                                        processUniProtTxt(p, json);
-                                    });
-                                } else {
-                                    //not protein, no accession or isDecoy
-                                    participantCount--;
-                                    if (participantCount === 0) {
-                                        CLMSUI.vent.trigger("uniprotDataParsed", self);
-                                    }
-                                }
-                            }
-
-                            if (true){//participantCount < 101 && participantCount > 0) {
-                                //var participantArray = CLMS.arrayFromMapValues(realParticipants);
-                                var invariantCount = participantCount;
-                                for (var p = 0; p < invariantCount; p++ ){
-                                    uniProtTxt(realParticipantArray[p]);
-                                }
-                            }
-                            else {
-            					CLMSUI.vent.trigger("uniprotDataParsed", self);
-                            }*/
-
+            window.vent.trigger("uniprotDataParsed", self); // todo - get rid
         }
 
-    },
+    }
+
 
     // Connect searches to proteins
-    getProteinSearchMap: function(peptideArray, rawMatchArray) {
-        var pepMap = d3.map(peptideArray, function(peptide) {
+    getProteinSearchMap(peptideArray, rawMatchArray) {
+        const pepMap = d3.map(peptideArray, function (peptide) {
             return peptide.id;
         });
-        var searchMap = {};
+        const searchMap = {};
         rawMatchArray = rawMatchArray || [];
-        rawMatchArray.forEach(function(rawMatch) {
-            var peptideIDs = rawMatch.pi ? rawMatch.pi : [rawMatch.pi1, rawMatch.pi2];
-            peptideIDs.forEach (function (pepID) {
+        rawMatchArray.forEach(function (rawMatch) {
+            const peptideIDs = rawMatch.pi ? rawMatch.pi : [rawMatch.pi1, rawMatch.pi2];
+            peptideIDs.forEach(function (pepID) {
                 if (pepID) {
-                    var prots = pepMap.get(pepID).prt;
-                    var searchToProts = searchMap[rawMatch.si];
+                    const prots = pepMap.get(pepID).prt;
+                    let searchToProts = searchMap[rawMatch.si];
                     if (!searchToProts) {
-                        var newSet = d3.set();
+                        const newSet = d3.set();
                         searchMap[rawMatch.si] = newSet;
                         searchToProts = newSet;
                     }
-                    prots.forEach(function(prot) {
+                    prots.forEach(function (prot) {
                         searchToProts.add(prot);
                     });
                 }
             });
         });
         return searchMap;
-    },
+    }
 
     //adds some attributes we want to protein object
-    initProtein: function(protObj, json) {
-        if (!protObj.crossLinks) {
-            protObj.crossLinks = [];
+    initProtein(protObj, json) {
+        if (!protObj.crosslinks) {
+            protObj.crosslinks = [];
         }
         protObj.is_decoy = false;
-        var accCheck = protObj.accession.match(this.commonRegexes.uniprotAccession);
+        var accCheck = protObj.accession.match(SearchResultsModel.commonRegexes.uniprotAccession);
         if (protObj.seq_mods) {
-            this.commonRegexes.notUpperCase.lastIndex = 0;
-            protObj.sequence = protObj.seq_mods.replace(this.commonRegexes.notUpperCase, '');
+            SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
+            protObj.sequence = protObj.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
         } else if (accCheck != null && json.interactors[protObj.accession]) {
             protObj.sequence = json.interactors[protObj.accession].sequence;
         } else {
-          protObj.sequence = "";
+            protObj.sequence = "";
         }
         protObj.size = protObj.sequence.length;
 
@@ -381,20 +286,20 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
         // if (protObj.name.indexOf("_") != -1) {
         //     protObj.name = protObj.name.substring(0, protObj.name.indexOf("_"))
         // }
-        protObj.getMeta = function(metaField) {
+        protObj.getMeta = function (metaField) {
             if (arguments.length === 0) {
                 return this.meta;
             }
             return this.meta ? this.meta[metaField] : undefined;
         }.bind(protObj);
 
-        protObj.setMeta = function(metaField, value) {
+        protObj.setMeta = function (metaField, value) {
             if (arguments.length === 2) {
                 this.meta = this.meta || {};
                 this.meta[metaField] = value;
             }
         }.bind(protObj);
-    },
+    }
 
     //TODO
     /*        getDigestibleResiduesAsFeatures: function (participant){
@@ -459,23 +364,23 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
                 return crosslinkableResiduesAsFeatures;
             },
     */
-    initDecoyLookup: function(prefixes) {
+    initDecoyLookup(prefixes) {
         // Make map of reverse/random decoy proteins to real proteins
-        prefixes = prefixes || ["REV_", "RAN_", "DECOY_", "DECOY:", "reverse_"];
-        var prots = CLMS.arrayFromMapValues(this.get("participants"));
-        var nameMap = d3.map();
-        var accessionMap = d3.map();
-        prots.forEach(function(prot) {
+        prefixes = prefixes || ["REV_", "RAN_", "DECOY_", "DECOY:", "reverse_", "REV", "RAN"];
+        const prots = Array.from(this.get("participants").values());
+        const nameMap = d3.map();
+        const accessionMap = d3.map();
+        prots.forEach(function (prot) {
             nameMap.set(prot.name, prot.id);
             accessionMap.set(prot.accession, prot.id);
             prot.targetProteinID = prot.id; // this gets overwritten for decoys in next bit, mjg
         });
         var decoyToTargetMap = d3.map();
-        var decoys = prots.filter(function(p) {
+        var decoys = prots.filter(function (p) {
             return p.is_decoy;
         });
-        decoys.forEach(function(decoyProt) {
-            prefixes.forEach(function(pre) {
+        decoys.forEach(function (decoyProt) {
+            prefixes.forEach(function (pre) {
                 var targetProtIDByName = nameMap.get(decoyProt.name.substring(pre.length));
                 if (decoyProt.accession) {
                     var targetProtIDByAccession = accessionMap.get(decoyProt.accession.substring(pre.length));
@@ -489,39 +394,42 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
         });
 
         this.targetProteinCount = prots.length - decoys.length;
-    },
+    }
 
-    isMatchingProteinPair: function(prot1, prot2) {
+    isMatchingProteinPair(prot1, prot2) {
         return prot1 && prot2 && prot1.targetProteinID === prot2.targetProteinID;
-    },
+    }
 
-    isMatchingProteinPairFromIDs: function(prot1ID, prot2ID) {
-        if (prot1ID === prot2ID) {
-            return true;
-        }
-        var participants = this.get("participants");
-        var prot1 = participants.get(prot1ID);
-        var prot2 = participants.get(prot2ID);
-        return this.isMatchingProteinPair(prot1, prot2);
-    },
+    /*
+        isMatchingProteinPairFromIDs: function(prot1ID, prot2ID) {
+            if (prot1ID === prot2ID) {
+                return true;
+            }
+            const participants = this.get("participants");
+            const prot1 = participants.get(prot1ID);
+            const prot2 = participants.get(prot2ID);
+            return this.isMatchingProteinPair(prot1, prot2);
+        },
+    */
+    isSelfLink(crosslink) {
+        return crosslink.isSelfLink();
+    }
 
-    isSelfLink: function(crossLink) {
-        return crossLink.isSelfLink();
-    },
+    getSearchRandomId(match) {
+        const searchId = match.searchId;
+        const searchMap = this.get("searches");
+        const searchData = searchMap.get(searchId);
+        return searchData.random_id;
+    }
+}
 
-    getSearchRandomId: function(match) {
-        var searchId = match.searchId;
-        var searchMap = this.get("searches");
-        var searchData = searchMap.get(searchId);
-        var randId = searchData.random_id;
-        return randId;
-    },
-
-    attributeOptions: [{
-            linkFunc: function(link) {
+SearchResultsModel.attributeOptions =
+    [
+        {
+            linkFunc: function (link) {
                 return [link.filteredMatches_pp.length];
             },
-            unfilteredLinkFunc: function(link) {
+            unfilteredLinkFunc: function (link) {
                 return [link.matches_pp.length];
             },
             id: "MatchCount",
@@ -529,13 +437,13 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             decimalPlaces: 0
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.score();
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.score();
                 });
             },
@@ -545,16 +453,16 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                var scores = link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                const scores = link.filteredMatches_pp.map(function (m) {
                     return m.match.score();
                 });
                 return [Math.max.apply(Math, scores)];
             },
-            unfilteredLinkFunc: function(link) {
-                var scores = link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                const scores = link.matches_pp.map(function (m) {
                     return m.match.score();
-                })
+                });
                 return [Math.max.apply(Math, scores)];
             },
             id: "Highest Score",
@@ -563,13 +471,13 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             matchLevel: false
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.precursorMZ;
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.precursorMZ;
                 });
             },
@@ -579,13 +487,13 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.precursorCharge;
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.precursorCharge;
                 });
             },
@@ -595,13 +503,13 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.calcMass();
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.calcMass();
                 });
             },
@@ -611,13 +519,13 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.massError();
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.massError();
                 });
             },
@@ -627,13 +535,13 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return Math.min(m.pepPos[0].length, m.pepPos[1].length);
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return Math.min(m.pepPos[0].length, m.pepPos[1].length);
                 });
             },
@@ -659,11 +567,11 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
         //     id: "ElutionTimeEnd", label: "Elution Time End", decimalPlaces: 2, matchLevel: true
         // },
         {
-            linkFunc: function(link, option) {
+            linkFunc: function (link, option) {
                 //return link.isLinearLink() ? [] : [this.model.getSingleCrosslinkDistance(link, null, null, option)];
                 return link.isLinearLink() ? [] : [link.getMeta("distance")];
             },
-            unfilteredLinkFunc: function(link, option) {
+            unfilteredLinkFunc: function (link, option) {
                 //return link.isLinearLink() ? [] : [this.model.getSingleCrosslinkDistance(link, null, null, option)];
                 return link.isLinearLink() ? [] : [link.getMeta("distance")];
             },
@@ -673,13 +581,13 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             maxVal: 90,
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.modificationCount();
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.modificationCount();
                 });
             },
@@ -688,6 +596,10 @@ CLMS.model.SearchResultsModel = Backbone.Model.extend({
             decimalPlaces: 0,
             matchLevel: true
         },
-    ],
+    ];
 
-});
+SearchResultsModel.commonRegexes = {
+    uniprotAccession: /[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}/,
+    notUpperCase: /[^A-Z]/g,
+    decoyNames: /(REV_)|(RAN_)|(DECOY_)|(DECOY:)|(reverse_)/,
+};
