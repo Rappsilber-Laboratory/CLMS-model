@@ -165,6 +165,7 @@ if (count($_GET) > 0) {
     if ($passingOnly) {
         $query = $query. "AND pass_threshold";
     }
+    $query = $query."AND pep2_id <> ''";
     # $query = $query. " ORDER BY scores->>'xi:score' DESC";
     $startTime = microtime(true);
     $res = pg_query($query) or die('Query failed: ' . pg_last_error());
