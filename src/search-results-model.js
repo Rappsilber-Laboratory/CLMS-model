@@ -175,7 +175,7 @@ export class SearchResultsModel extends Backbone.Model {
             this.set("crosslinkerSpecificity", linkableResSets);
 
             //saved config should end up including filter settings not just xiNET layout
-            this.set("xiNETLayout", json.xiNETLayout);
+            this.set("savedConfig", json.xiNETLayout);
 
             //spectrum sources
             const spectrumSources = new Map();
@@ -286,7 +286,7 @@ export class SearchResultsModel extends Backbone.Model {
                 participant.uniprot = json.interactors ? json.interactors[participant.accession.split("-")[0]] : null;
             }
 
-            window.vent.trigger("uniprotDataParsed", self); // todo - get rid
+            // window.vent.trigger("uniprotDataParsed", self); // todo - get rid?
         }
 
     }
