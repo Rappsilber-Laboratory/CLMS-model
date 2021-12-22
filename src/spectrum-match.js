@@ -1,95 +1,79 @@
 import {Crosslink} from "./crosslink";
 
 export class SpectrumMatch {
-    constructor(containingModel, participants, crosslinks, peptides, rawMatches) {
-
-        // single 'rawMatch'looks like {"id":25918012,"ty":1,"pi":8485630,"lp":0,
-        // "sc":3.25918,"si":624, dc:"f", "av":"f", (optional v:"A", rj: "f" ),
-        // "si":"searchId", "src":"to look up runname", "sn":6395,"pc":2, cm:"calc_mass"},
-        //
-        // it's a join of spectrum_match and matched_peptide tables in DB,
-        //
-        // may seem convoluted but its to reduce amount of data need to transfer
-        //
-        // id = spectrumMatch id, ty = "match_type" (match_type != protduct_type)
-        // pi = peptide_id, lp = link position, sc = score, si = search_id,
-        // dc = is_decoy, av = autovalidated, v = validated, rj = rejected,
-        // sn = scan_number, pc_c = precursor charge, src = for run name look up
-        // cm = calc-mass
+    constructor(containingModel, participants, crosslinks, peptides, rawMatch) {
 
         this.containingModel = containingModel; //containing BB model
 
-        //following are duplicated in each raw_match (they are from spectrum _match table)
-        // take values from rawMatches[0]
-        this.id = rawMatches[0].id;
-        this.spectrumId = rawMatches[0].spec;
-        this.searchId = rawMatches[0].si.toString();
-        this.crosslinker_id = rawMatches[0].cl;
-        if (rawMatches[0].dc) {
-            this.is_decoy = (rawMatches[0].dc === 't');
-        }
-        if (this.is_decoy === true) {
-            this.containingModel.set("decoysPresent", true);
-        }
-        this.scanNumber = +rawMatches[0].sn;
-        this.scanIndex = +rawMatches[0].sc_i;
-        this.precursor_intensity = +rawMatches[0].pc_i;
-        this.elution_time_start = +rawMatches[0].e_s;
-        this.elution_time_end = +rawMatches[0].e_e;
+        this.id = rawMatch.id;
+        this.spectrumId = null; // todo
+        this.searchId = rawMatch.si.toString();
+        this.crosslinker_id = rawMatch.cl;
+        // if (rawMatches[0].dc) {
+        //     this.is_decoy = (rawMatches[0].dc === 't');
+        // }
+        // if (this.is_decoy === true) {
+        //     this.containingModel.set("decoysPresent", true);
+        // }
+        this.scanNumber = null;//+rawMatches[0].sn;
+        this.scanIndex = null;//+rawMatches[0].sc_i;
+        this.precursor_intensity = null;//+rawMatches[0].pc_i;
+        this.elution_time_start = null;//+rawMatches[0].e_s;
+        this.elution_time_end = null;//+rawMatches[0].e_e;
 
-        this.src = +rawMatches[0].src; //for looking up run name
-        this.plf = +rawMatches[0].plf; //for looking up peak list file name
+        this.src = null;//+rawMatches[0].src; //for looking up run name
+        this.plf = null;//+rawMatches[0].plf; //for looking up peak list file name
         //run name may have come from csv file
-        if (rawMatches[0].run_name) {
-            this.run_name = rawMatches[0].run_name;
-        }
+        // if (rawMatches[0].run_name) {
+        //     this.run_name = rawMatches[0].run_name;
+        // }
 
-        this.precursorCharge = +rawMatches[0].pc_c;
+        this.precursorCharge = +rawMatch.pc_c;
         if (this.precursorCharge === -1) {
             this.precursorCharge = undefined;
         }
 
-        this.precursorMZ = +rawMatches[0].pc_mz;
-        this.calc_mass = +rawMatches[0].cm;
-        this._score = +rawMatches[0].sc;
+        this.precursorMZ = +rawMatch.pc_mz;
+        this.calc_mass = +rawMatch.cm;
+        this._score = +rawMatch.sc;
         //autovalidated - another attribute
-        if (rawMatches[0].av) {
-            this.autovalidated = rawMatches[0].av === "t";
-            this.containingModel.set("autoValidatedPresent", true);
-        }
-        // used in Rappsilber Lab to record manual validation status
-        if (rawMatches[0].v) {
-            this.validated = rawMatches[0].v;
-            this.containingModel.set("manualValidatedPresent", true);
-        }
+        // if (rawMatches[0].av) {
+        //     this.autovalidated = rawMatches[0].av === "t";
+        //     this.containingModel.set("autoValidatedPresent", true);
+        // }
+        // // used in Rappsilber Lab to record manual validation status
+        // if (rawMatches[0].v) {
+        //     this.validated = rawMatches[0].v;
+        //     this.containingModel.set("manualValidatedPresent", true);
+        // }
+        //
+        // if (!this.autovalidated && !this.validated) {
+        //     this.containingModel.set("unvalidatedPresent", true);
+        // }
 
-        if (!this.autovalidated && !this.validated) {
-            this.containingModel.set("unvalidatedPresent", true);
-        }
-
-        if (peptides) { //this is a bit tricky, see below*
+        // if (peptides) { //this is a bit tricky, see below*
             this.matchedPeptides = [];
-            this.matchedPeptides[0] = peptides.get(rawMatches[0].pi);
+            this.matchedPeptides[0] = peptides.get("" + rawMatch.pi1);
             // following will be inadequate for trimeric and higher order cross-links
-            if (rawMatches[1]) {
-                this.matchedPeptides[1] = peptides.get(rawMatches[1].pi);
+            if (rawMatch.pi2) {
+                this.matchedPeptides[1] = peptides.get("" + rawMatch.pi2);
             }
-        } else { //*here - if its from a csv file use rawMatches as the matchedPep array,
-            //makes it easier to construct as parsing CSV
-            this.matchedPeptides = rawMatches;
-        }
+        // } else { //*here - if its from a csv file use rawMatches as the matchedPep array,
+        //     //makes it easier to construct as parsing CSV
+        //     this.matchedPeptides = rawMatches;
+        // }
 
         //if the match is ambiguous it will relate to many crosslinks
         this.crosslinks = [];
-        this.linkPos1 = +rawMatches[0].lp;
-        if (rawMatches[1]) {
-            this.linkPos2 = +rawMatches[1].lp;
-        }
+        this.linkPos1 = +rawMatch.s1;
+        // if (rawMatch.s2) {
+            this.linkPos2 = +rawMatch.s2;
+        // }
 
         // the protein IDs and residue numers we eventually want to get:-
         let p1ID, p2ID, res1, res2;
 
-        if (this.linkPos1 === 0) { //would have been -1 in DB but 1 was added to it during query
+        if (this.isLinear()) { //would have been -1 in DB but 1 was added to it during query
             //its a linear
             this.containingModel.set("linearsPresent", true);
             for (let i = 0; i < this.matchedPeptides[0].prt.length; i++) {
@@ -186,7 +170,7 @@ export class SpectrumMatch {
 
         let fromProt, toProt;
 
-        if (!p2ID || p2ID === "" || p2ID === '-' || p2ID === 'n/a') { //its  a linear peptide (no crosslinker of any product type))
+        if (this.isLinear()){//!p2ID || p2ID === "" || p2ID === '-' || p2ID === 'n/a') { //its  a linear peptide (no crosslinker of any product type))
             this.containingModel.set("linearsPresent", true);
             fromProt = proteins.get(p1ID);
             if (!fromProt) {
@@ -243,7 +227,7 @@ export class SpectrumMatch {
             //to and from proteins were already swapped over above
 
             //WATCH OUT - residues need to be in correct order
-            if (!p2ID) {
+            if (this.isLinear()) {
                 resLink = new Crosslink(crosslinkID, fromProt,
                     res1, null, null, this.containingModel);
             } else if (p1ID === p2ID) {

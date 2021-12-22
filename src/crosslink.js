@@ -8,6 +8,7 @@ export class Crosslink {
         this.fromResidue = fromResidue;
         this.toProtein = toProtein;
         this.toResidue = toResidue;
+        console.log("!", this.fromProtein, this.fromResidue, this.toProtein, this.toResidue);
     }
 
     isDecoyLink() {

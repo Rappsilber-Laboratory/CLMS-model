@@ -55,47 +55,47 @@ export class SearchResultsModel extends Backbone.Model {
             // TODO _ seems like theres a duplication problem here if multiple searches are aggregated
 
             //eliminate duplication first
-            const enzymeDescriptions = new Set();
-            for (let search of searches.values()) {
-                for (let enzyme of search.enzymes) {
-                    enzymeDescriptions.add(enzyme.description);
-                }
-            }
-
-            const postAaSet = new Set();
-            const aaConstrainedCTermSet = new Set();
-            const aaConstrainedNTermSet = new Set();
-
-            for (let enzymeDescription of enzymeDescriptions) {
-                const postAARegex = /PostAAConstrainedDigestion:DIGESTED:(.*?);ConstrainingAminoAcids:(.*?);/g;
-                const postAAMatch = postAARegex.exec(enzymeDescription);
-                getResiduesFromEnzymeDescription(postAAMatch, postAaSet);
-
-                const cTermRegex = /CTERMDIGEST:(.*?);/g;
-                const ctMatch = cTermRegex.exec(enzymeDescription);
-                getResiduesFromEnzymeDescription(ctMatch, aaConstrainedCTermSet);
-
-                const nTermRegex = /NTERMDIGEST:(.*?);/g;
-                const ntMatch = nTermRegex.exec(enzymeDescription);
-                getResiduesFromEnzymeDescription(ntMatch, aaConstrainedNTermSet);
-            }
-
-            const addEnzymeSpecificityResidues = function (residueSet, type) {
-                const resArray = Array.from(residueSet.values());
-                const resCount = resArray.length;
-                for (let r = 0; r < resCount; r++) {
-                    enzymeSpecificity.push({
-                        aa: resArray[r].aa,
-                        type: type,
-                        postConstraint: resArray[r].postConstraint
-                    });
-                }
-            };
+            // const enzymeDescriptions = new Set();
+            // for (let search of searches.values()) {
+            //     for (let enzyme of search.enzymes) {
+            //         enzymeDescriptions.add(enzyme.description);
+            //     }
+            // }
+            //
+            // const postAaSet = new Set();
+            // const aaConstrainedCTermSet = new Set();
+            // const aaConstrainedNTermSet = new Set();
+            //
+            // for (let enzymeDescription of enzymeDescriptions) {
+            //     const postAARegex = /PostAAConstrainedDigestion:DIGESTED:(.*?);ConstrainingAminoAcids:(.*?);/g;
+            //     const postAAMatch = postAARegex.exec(enzymeDescription);
+            //     getResiduesFromEnzymeDescription(postAAMatch, postAaSet);
+            //
+            //     const cTermRegex = /CTERMDIGEST:(.*?);/g;
+            //     const ctMatch = cTermRegex.exec(enzymeDescription);
+            //     getResiduesFromEnzymeDescription(ctMatch, aaConstrainedCTermSet);
+            //
+            //     const nTermRegex = /NTERMDIGEST:(.*?);/g;
+            //     const ntMatch = nTermRegex.exec(enzymeDescription);
+            //     getResiduesFromEnzymeDescription(ntMatch, aaConstrainedNTermSet);
+            // }
+            //
+            // const addEnzymeSpecificityResidues = function (residueSet, type) {
+            //     const resArray = Array.from(residueSet.values());
+            //     const resCount = resArray.length;
+            //     for (let r = 0; r < resCount; r++) {
+            //         enzymeSpecificity.push({
+            //             aa: resArray[r].aa,
+            //             type: type,
+            //             postConstraint: resArray[r].postConstraint
+            //         });
+            //     }
+            // };
 
             const enzymeSpecificity = [];
-            addEnzymeSpecificityResidues(postAaSet, "DIGESTIBLE"); //"Post AA constrained");
-            addEnzymeSpecificityResidues(aaConstrainedCTermSet, "DIGESTIBLE"); // "AA constrained c-term");
-            addEnzymeSpecificityResidues(aaConstrainedNTermSet, "DIGESTIBLE"); // "AA constrained n-term");
+            // addEnzymeSpecificityResidues(postAaSet, "DIGESTIBLE"); //"Post AA constrained");
+            // addEnzymeSpecificityResidues(aaConstrainedCTermSet, "DIGESTIBLE"); // "AA constrained c-term");
+            // addEnzymeSpecificityResidues(aaConstrainedNTermSet, "DIGESTIBLE"); // "AA constrained n-term");
             this.set("enzymeSpecificity", enzymeSpecificity);
 
             //crosslink specificity
@@ -216,19 +216,19 @@ export class SearchResultsModel extends Backbone.Model {
                     SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
                     peptide = peptideArray[pep];
                     peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, '');
-                    peptides.set(peptide.id, peptide);
+                    peptides.set("" + peptide.id, peptide);
                 }
             }
 
             const crosslinks = this.get("crosslinks");
 
-            const rawMatches = json.rawMatches;
+            const rawMatches = json.matches;
             let minScore = undefined;
             let maxScore = undefined;
 
             // moved from modelUtils 05/08/19
             // Connect searches to proteins, and add the protein set as a property of a search in the clmsModel, MJG 17/05/17
-            const searchMap = this.getProteinSearchMap(json.peptides, json.rawMatches || json.identifications);
+            const searchMap = this.getProteinSearchMap(json.peptides, json.matches || json.identifications);
             this.get("searches").forEach(function (value, key) {
                 value.participantIDSet = searchMap[key];
             });
@@ -236,33 +236,8 @@ export class SearchResultsModel extends Backbone.Model {
 
             if (rawMatches) {
                 const matches = this.get("matches");
-
-                const l = rawMatches.length;
-                let match;
-                for (let i = 0; i < l; i++) {
-                    //this would need updated for trimeric or higher order crosslinks
-                    const rawMatch = rawMatches[i];
-                    const rawMatchArray = [rawMatch];
-
-                    if (rawMatch.ty.length === undefined) {
-                        if ((i < (l - 1)) && rawMatch.id === rawMatches[i + 1].id) {
-                            rawMatchArray.push(rawMatches[i + 1]);
-                            i++;
-                        }
-                    } else {
-                        const size = rawMatch.ty.length;
-                        if (size > 1) {
-                            for (let j = 1; j < size; j++) {
-                                rawMatchArray.push({pi: rawMatch.pi[j], lp: rawMatch.lp[j]});
-                            }
-                        }
-                        rawMatch.ty = rawMatch.ty[0];
-                        rawMatch.pi = rawMatch.pi[0];
-                        rawMatch.lp = rawMatch.lp[0];
-                        //rawMatch.cl = rawMatch.cl[0]; // PHP/SQL now returns crosslinker_id as single value, not array
-                    }
-
-                    match = new SpectrumMatch(this, participants, crosslinks, peptides, rawMatchArray);
+                for (let rawMatch of rawMatches) {
+                    const match = new SpectrumMatch(this, participants, crosslinks, peptides, rawMatch);
                     matches.push(match);
 
                     if (maxScore === undefined || match.score() > maxScore) {
