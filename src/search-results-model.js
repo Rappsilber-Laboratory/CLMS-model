@@ -385,7 +385,7 @@ export class SearchResultsModel extends Backbone.Model {
                 var targetProtIDByName = nameMap.get(decoyProt.name.substring(pre.length));
                 if (decoyProt.accession) {
                     var targetProtIDByAccession = accessionMap.get(decoyProt.accession.substring(pre.length));
-                    if (targetProtIDByName && targetProtIDByAccession) {
+                    if (targetProtIDByAccession) {
                         decoyProt.targetProteinID = targetProtIDByName; // mjg
                     }
                 } else if (targetProtIDByName) {
