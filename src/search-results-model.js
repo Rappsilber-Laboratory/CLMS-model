@@ -163,7 +163,6 @@ export class SearchResultsModel extends Backbone.Model {
                     participants.set(participant.id, participant);
                 }
             }
-            this.initDecoyLookup();
 
             //peptides
             var peptides = new Map();
@@ -185,6 +184,8 @@ export class SearchResultsModel extends Backbone.Model {
                     }
                 }
             }
+
+            this.initDecoyLookup();
 
             var crosslinks = this.get("crosslinks");
 
