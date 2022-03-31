@@ -395,21 +395,9 @@ export class SpectrumMatch {
     }
 
     modificationCount() {
-        function peptideModCount(peptide) {
-            let count = 0;
-            const sequence = peptide.seq_mods;
-            const pepLen = sequence.length;
-            for (let i = 0; i < pepLen - 1; i++) {
-                const a = sequence[i];
-                const b = sequence[i + 1];
-                if ((a >= "A" && a <= "Z") && (b < "A" || b > "Z")) count++;
-            }
-            return count;
-        }
-
-        const modCount1 = peptideModCount(this.matchedPeptides[0]);
+        const modCount1 = this.matchedPeptides[0].mod_pos.length;
         if (this.matchedPeptides[1]) {
-            const modCount2 = peptideModCount(this.matchedPeptides[1]);
+            const modCount2 = this.matchedPeptides[1].mod_pos.length;
             if (modCount2 > modCount1) {
                 return modCount2;
             }

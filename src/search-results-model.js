@@ -2,6 +2,7 @@ import * as d3 from "d3";
 import * as Backbone from "backbone";
 
 import {SpectrumMatch} from "./spectrum-match";
+import {Peptide} from "./peptide";
 
 export class SearchResultsModel extends Backbone.Model {
 
@@ -33,17 +34,12 @@ export class SearchResultsModel extends Backbone.Model {
             this.set("sid", json.sid);
 
             //modifications
-            var modifications = [];
-            var modCount = json.modifications.length;
-            for (var m = 0; m < modCount; m++) {
-                var mod = json.modifications[m];
-                modifications.push({
-                    aminoAcids: mod.residues.split(""),
-                    id: mod.mod_name,
-                    mass: mod.mass
-                });
+            // short term hack - index mod names by accession
+            const modificationNames = new Map();
+            for (let mod of json.modifications){
+                modificationNames.set(mod.accession, mod.mod_name);
             }
-            this.set("modifications", modifications);
+            this.set("modificationNames", modificationNames);
 
             //search meta data
             const searches = new Map();
@@ -165,20 +161,14 @@ export class SearchResultsModel extends Backbone.Model {
             }
 
             //peptides
-            var peptides = new Map();
+            const peptides = new Map();
             if (json.peptides) {
-                var peptideArray = json.peptides;
-                var pepCount = peptideArray.length;
-                var peptide;
-                for (var pep = 0; pep < pepCount; pep++) {
-                    SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
-                    peptide = peptideArray[pep];
-                    peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
-                    peptides.set(peptide.u_id + "_" + peptide.id, peptide); // concat upload_id and peptide.id
-
-                    for (var p = 0; p < peptide.prt.length; p++) {
-                        if (peptide.is_decoy[p]) {
-                            participants.get(peptide.prt[p]).is_decoy = true;
+                for (let pep of json.peptides) {
+                    const peptide = new Peptide(pep, this);
+                    peptides.set(peptide.id, peptide);
+                    for (let pi = 0; pi < peptide.prt.length; pi++) {
+                        if (peptide.is_decoy[pi]) {
+                            participants.get(peptide.prt[pi]).is_decoy = true;
                             this.set("decoysPresent", true);
                         }
                     }
