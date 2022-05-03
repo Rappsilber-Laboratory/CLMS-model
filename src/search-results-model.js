@@ -411,11 +411,11 @@ export class SearchResultsModel extends Backbone.Model {
                             crosslinkableResiduesAsFeatures.push({
                                 begin: s + 1,
                                 end: s + 1,
-                                name: "CROSS-LINKABLE-" + reactiveGroup,
+                                name: "CROSSLINKABLE-" + reactiveGroup,
                                 protID: participant.id,
-                                id: participant.id + " Cross-linkable residue" + (s + 1) + "[group " + reactiveGroup + "]",
+                                id: participant.id + " Crosslinkable residue" + (s + 1) + "[group " + reactiveGroup + "]",
                                 category: "AA",
-                                type: "CROSS-LINKABLE-" + reactiveGroup
+                                type: "CROSSLINKABLE-" + reactiveGroup
                             });
                         }
                     }
