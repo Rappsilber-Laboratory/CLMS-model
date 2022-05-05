@@ -161,7 +161,7 @@ export class SpectrumMatch {
     }
 
     associateWithLink(proteins, crosslinks, p1ID, p2ID, res1, res2, //following params may be null :-
-                      pep1_start, pep1_length, pep2_start, pep2_length) {
+        pep1_start, pep1_length, pep2_start, pep2_length) {
 
         // we don't want two different ID's, e.g. one thats "33-66" and one thats "66-33"
         //following puts lower protein_ID first in link_ID
@@ -223,7 +223,7 @@ export class SpectrumMatch {
 
         //get or create residue link
         let resLink = crosslinks.get(crosslinkID);
-        if (typeof resLink == 'undefined') {
+        if (typeof resLink == "undefined") {
             //to and from proteins were already swapped over above
 
             //WATCH OUT - residues need to be in correct order
@@ -236,9 +236,7 @@ export class SpectrumMatch {
                 } else {
                     resLink = new Crosslink(crosslinkID, fromProt, res2, toProt, res1, this.containingModel);
                 }
-            }
-            //
-            else if (p1ID === fromProt.id) {
+            } else if (p1ID === fromProt.id) {
                 resLink = new Crosslink(crosslinkID, fromProt, res1, toProt, res2, this.containingModel);
             } else {
                 //WATCH OUT - residues need to be in correct oprder
@@ -321,11 +319,11 @@ export class SpectrumMatch {
         return this.precursorMZ * this.precursorCharge - (this.precursorCharge * SpectrumMatch.protonMass);
     }
 
-    calcMZ () {
+    calcMZ() {
         return (this.calc_mass + (this.precursorCharge * SpectrumMatch.protonMass)) / this.precursorCharge;
     }
 
-    calcMass () {
+    calcMass() {
         return this.calc_mass;
     }
 
@@ -336,7 +334,7 @@ export class SpectrumMatch {
         return Math.round(errorM / SpectrumMatch.C13_MASS_DIFFERENCE);
     }
 
-    massError () {
+    massError() {
         //old
         //return ((this.expMass() - this.calcMass()) / this.calcMass()) * 1000000;
 
@@ -347,11 +345,11 @@ export class SpectrumMatch {
         return errorMZ / this.calcMZ() * 1000000;
     }
 
-    ionTypes  () {
+    ionTypes() {
         return this.containingModel.get("searches").get(this.searchId).ionTypes;
     }
 
-    ionTypesString () {
+    ionTypesString() {
         const ions = this.ionTypes();
         let returnString = "";
         for (let i = 0; i < ions.length; i++) {
@@ -364,14 +362,14 @@ export class SpectrumMatch {
         return returnString;
     }
 
-    crosslinkerModMass () {
+    crosslinkerModMass() {
         const crosslinker = this.getCrossLinker();
         if (crosslinker) {
             return crosslinker.mass;
         } else return 0;
     }
 
-    getCrossLinker () {
+    getCrossLinker() {
         if (this.crosslinker_id === -1) {
             return null;
         }
@@ -380,30 +378,30 @@ export class SpectrumMatch {
         const clCount = crosslinkers.length;
         for (let c = 0; c < clCount; c++) {
             const crosslinker = crosslinkers[c];
-            if (crosslinker.id == this.crosslinker_id) { // yes, they're different types
+            if (crosslinker.id == this.crosslinker_id) { // yes, they're different types, don't ===
                 return crosslinker;
             }
         }
     }
 
-    fragmentTolerance () {
+    fragmentTolerance() {
         const search = this.containingModel.get("searches").get(this.searchId);
         return {
             "tolerance": search.ms2tolerance,
-            'unit': search.ms2toleranceunits
+            "unit": search.ms2toleranceunits
         };
     }
 
-    fragmentToleranceString () {
+    fragmentToleranceString() {
         const search = this.containingModel.get("searches").get(this.searchId);
         return search.ms2tolerance + " " + search.ms2toleranceunits;
     }
 
-    score () {
+    score() {
         return this._score;
     }
 
-    experimentalMissedCleavageCount () {
+    experimentalMissedCleavageCount() {
         const enzymeSpecificity = this.containingModel.get("enzymeSpecificity");
 
         //yes... this should prob be done with regex

@@ -40,12 +40,12 @@ export class SearchResultsModel extends Backbone.Model {
 
             const getResiduesFromEnzymeDescription = function (regexMatch, residueSet) {
                 if (regexMatch && regexMatch.length > 1) {
-                    const resArray = regexMatch[1].split(',');
+                    const resArray = regexMatch[1].split(",");
                     const resCount = resArray.length;
                     for (let r = 0; r < resCount; r++) {
                         residueSet.add({
                             aa: resArray[r],
-                            postConstraint: regexMatch[2] ? regexMatch[2].split(',') : null
+                            postConstraint: regexMatch[2] ? regexMatch[2].split(",") : null
                         });
                     }
                 }
@@ -152,7 +152,7 @@ export class SearchResultsModel extends Backbone.Model {
                             resSet.linkables[i] = new Set();
                         }
 
-                        const resArray = result[1].split(',');
+                        const resArray = result[1].split(",");
                         resArray.forEach(function (res) {
                             const resRegex = /(cterm|nterm|[A-Z])(.*)?/i;
                             const resMatch = resRegex.exec(res);
@@ -215,7 +215,7 @@ export class SearchResultsModel extends Backbone.Model {
                 for (let pep = 0; pep < pepCount; pep++) {
                     SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
                     peptide = peptideArray[pep];
-                    peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, '');
+                    peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
                     peptides.set("" + peptide.id, peptide);
                 }
             }
@@ -258,7 +258,7 @@ export class SearchResultsModel extends Backbone.Model {
             });
 
             for (let participant of targetParticipantArray) {
-                participant.uniprot = json.interactors ? json.interactors[participant.accession.split('-')[0]] : null;
+                participant.uniprot = json.interactors ? json.interactors[participant.accession.split("-")[0]] : null;
             }
 
             window.vent.trigger("uniprotDataParsed", self); // todo - get rid
@@ -297,7 +297,7 @@ export class SearchResultsModel extends Backbone.Model {
     initProtein(protObj) {
         if (protObj.seq_mods) {
             SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
-            protObj.sequence = protObj.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, '');
+            protObj.sequence = protObj.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
         }
         if (protObj.sequence) {
             protObj.size = protObj.sequence.length;
@@ -313,16 +313,16 @@ export class SearchResultsModel extends Backbone.Model {
 
         //take out organism abbreviation after underscore from names
         if (protObj.name.indexOf("_") !== -1) {
-            protObj.name = protObj.name.substring(0, protObj.name.indexOf("_"))
+            protObj.name = protObj.name.substring(0, protObj.name.indexOf("_"));
         }
-        protObj.getMeta = function(metaField) {
+        protObj.getMeta = function (metaField) {
             if (arguments.length === 0) {
                 return this.meta;
             }
             return this.meta ? this.meta[metaField] : undefined;
         }.bind(protObj);
 
-        protObj.setMeta = function(metaField, value) {
+        protObj.setMeta = function (metaField, value) {
             if (arguments.length === 2) {
                 this.meta = this.meta || {};
                 this.meta[metaField] = value;
@@ -386,11 +386,11 @@ export class SearchResultsModel extends Backbone.Model {
                             crosslinkableResiduesAsFeatures.push({
                                 begin: s + 1,
                                 end: s + 1,
-                                name: "CROSS-LINKABLE-" + reactiveGroup,
+                                name: "CROSSLINKABLE-" + reactiveGroup,
                                 protID: participant.id,
-                                id: participant.id + " Cross-linkable residue" + (s + 1) + "[group " + reactiveGroup + "]",
+                                id: participant.id + " Crosslinkable residue" + (s + 1) + "[group " + reactiveGroup + "]",
                                 category: "AA",
-                                type: "CROSS-LINKABLE-" + reactiveGroup
+                                type: "CROSSLINKABLE-" + reactiveGroup
                             });
                         }
                     }
@@ -424,7 +424,7 @@ export class SearchResultsModel extends Backbone.Model {
                 if (decoyProt.accession) {
                     const targetProtIDByAccession = accessionMap.get(decoyProt.accession.substring(pre.length));
                     if ( /*targetProtIDByName && */ targetProtIDByAccession) {
-                        decoyProt.targetProteinID = targetProtIDByAccession /*targetProtIDByName*/; // mjg
+                        decoyProt.targetProteinID = targetProtIDByAccession; // mjg
                     }
                 } else if (targetProtIDByName) {
                     decoyProt.targetProteinID = targetProtIDByName; // mjg
@@ -462,11 +462,13 @@ export class SearchResultsModel extends Backbone.Model {
     }
 }
 
-SearchResultsModel.attributeOptions = [{
-            linkFunc: function(link) {
+SearchResultsModel.attributeOptions =
+    [
+        {
+            linkFunc: function (link) {
                 return [link.filteredMatches_pp.length];
             },
-            unfilteredLinkFunc: function(link) {
+            unfilteredLinkFunc: function (link) {
                 return [link.matches_pp.length];
             },
             id: "MatchCount",
@@ -474,13 +476,13 @@ SearchResultsModel.attributeOptions = [{
             decimalPlaces: 0
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.score();
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.score();
                 });
             },
@@ -490,13 +492,13 @@ SearchResultsModel.attributeOptions = [{
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
+            linkFunc: function (link) {
                 const scores = link.filteredMatches_pp.map(function (m) {
                     return m.match.score();
                 });
                 return [Math.max.apply(Math, scores)];
             },
-            unfilteredLinkFunc: function(link) {
+            unfilteredLinkFunc: function (link) {
                 const scores = link.matches_pp.map(function (m) {
                     return m.match.score();
                 });
@@ -508,13 +510,13 @@ SearchResultsModel.attributeOptions = [{
             matchLevel: false
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.precursorMZ;
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.precursorMZ;
                 });
             },
@@ -524,13 +526,13 @@ SearchResultsModel.attributeOptions = [{
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.precursorCharge;
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.precursorCharge;
                 });
             },
@@ -540,13 +542,13 @@ SearchResultsModel.attributeOptions = [{
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.calcMass();
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.calcMass();
                 });
             },
@@ -556,13 +558,13 @@ SearchResultsModel.attributeOptions = [{
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.massError();
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.massError();
                 });
             },
@@ -572,13 +574,13 @@ SearchResultsModel.attributeOptions = [{
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.missingPeaks();
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.missingPeaks();
                 });
             },
@@ -588,13 +590,13 @@ SearchResultsModel.attributeOptions = [{
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return Math.min(m.pepPos[0].length, m.pepPos[1].length);
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return Math.min(m.pepPos[0].length, m.pepPos[1].length);
                 });
             },
@@ -604,14 +606,14 @@ SearchResultsModel.attributeOptions = [{
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     const p = m.match.precursor_intensity;
                     return isNaN(p) ? undefined : p;
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     const p = m.match.precursor_intensity;
                     return isNaN(p) ? undefined : p;
                 });
@@ -625,13 +627,13 @@ SearchResultsModel.attributeOptions = [{
             logStart: 1000
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.elution_time_start;
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.elution_time_start;
                 });
             },
@@ -641,13 +643,13 @@ SearchResultsModel.attributeOptions = [{
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.elution_time_end;
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.elution_time_end;
                 });
             },
@@ -658,11 +660,11 @@ SearchResultsModel.attributeOptions = [{
         },
         {
             //watch out for the 'this' reference
-            linkFunc: function(link, option) {
+            linkFunc: function (link) {
                 //return link.isLinearLink() ? [] : [this.model.getSingleCrosslinkDistance(link, null, null, option)];
                 return link.isLinearLink() ? [] : [link.getMeta("distance")];
             },
-            unfilteredLinkFunc: function(link, option) {
+            unfilteredLinkFunc: function (link) {
                 //return link.isLinearLink() ? [] : [this.model.getSingleCrosslinkDistance(link, null, null, option)];
                 return link.isLinearLink() ? [] : [link.getMeta("distance")];
             },
@@ -672,13 +674,13 @@ SearchResultsModel.attributeOptions = [{
             maxVal: 90,
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.experimentalMissedCleavageCount();
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.experimentalMissedCleavageCount();
                 });
             },
@@ -688,13 +690,13 @@ SearchResultsModel.attributeOptions = [{
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.searchMissedCleavageCount();
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.searchMissedCleavageCount();
                 });
             },
@@ -704,13 +706,13 @@ SearchResultsModel.attributeOptions = [{
             matchLevel: true
         },
         {
-            linkFunc: function(link) {
-                return link.filteredMatches_pp.map(function(m) {
+            linkFunc: function (link) {
+                return link.filteredMatches_pp.map(function (m) {
                     return m.match.modificationCount();
                 });
             },
-            unfilteredLinkFunc: function(link) {
-                return link.matches_pp.map(function(m) {
+            unfilteredLinkFunc: function (link) {
+                return link.matches_pp.map(function (m) {
                     return m.match.modificationCount();
                 });
             },
@@ -719,10 +721,10 @@ SearchResultsModel.attributeOptions = [{
             decimalPlaces: 0,
             matchLevel: true
         },
-    ]
+    ];
 
 SearchResultsModel.commonRegexes = {
     uniprotAccession: /[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}/,
     notUpperCase: /[^A-Z]/g,
     decoyNames: /(REV_)|(RAN_)|(DECOY_)|(DECOY:)|(reverse_)/,
-}
+};
