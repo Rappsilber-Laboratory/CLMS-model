@@ -6,7 +6,7 @@ export class SpectrumMatch {
         this.containingModel = containingModel; //containing BB model
 
         this.id = rawMatch.id;
-        this.spectrumId = null; // todo
+        this.spectrumId = rawMatch.sp_id;
         this.searchId = rawMatch.si.toString();
         this.crosslinker_id = rawMatch.cl;
         // if (rawMatches[0].dc) {
@@ -374,7 +374,9 @@ export class SpectrumMatch {
             return null;
         }
 
-        const crosslinkers = this.containingModel.get("searches").get(this.searchId).crosslinkers;
+        const searches = this.containingModel.get("searches");
+        const search = searches.get(this.searchId);
+        const crosslinkers = search.crosslinkers;
         const clCount = crosslinkers.length;
         for (let c = 0; c < clCount; c++) {
             const crosslinker = crosslinkers[c];
