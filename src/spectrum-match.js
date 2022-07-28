@@ -55,8 +55,8 @@ export class SpectrumMatch {
             this.matchedPeptides = [];
             this.matchedPeptides[0] = peptides.get("" + rawMatch.pi1);
             // following will be inadequate for trimeric and higher order cross-links
-            if (rawMatch.pi2) {
-                this.matchedPeptides[1] = peptides.get("" + rawMatch.pi2);
+            if (!this.isNotCrosslinked()) {
+                this.matchedPeptides[1] = peptides.get(rawMatches[1].pi);
             }
         // } else { //*here - if its from a csv file use rawMatches as the matchedPep array,
         //     //makes it easier to construct as parsing CSV
@@ -73,7 +73,7 @@ export class SpectrumMatch {
         // the protein IDs and residue numers we eventually want to get:-
         let p1ID, p2ID, res1, res2;
 
-        if (this.isLinear()) { //would have been -1 in DB but 1 was added to it during query
+        if (this.isNotCrosslinked()) { //would have been -1 in DB but 1 was added to it during query
             //its a linear
             this.containingModel.set("linearsPresent", true);
             for (let i = 0; i < this.matchedPeptides[0].prt.length; i++) {
@@ -205,7 +205,7 @@ export class SpectrumMatch {
         // again, order id string by prot id or by residue if self-link
         let endsReversedInResLinkId = false;
         let crosslinkID;
-        if (this.isLinear()) {
+        if (this.isNotCrosslinked()) {
             crosslinkID = p1ID + "_linears";
         } else if (p1ID === p2ID || p2ID === null) {
             if ((res1 - 0) < (res2 - 0) || res2 === null) {
@@ -291,7 +291,7 @@ export class SpectrumMatch {
         }
     }
 
-    isLinear() {
+    isNotCrosslinked() {
         return this.linkPos1 === 0;
     }
 
