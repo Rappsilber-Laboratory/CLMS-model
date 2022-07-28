@@ -20,7 +20,7 @@ export class Crosslink {
     }
 
     isLinearLink() {
-        return this.matches_pp[0].match.isLinear();
+        return this.matches_pp[0].match.isNotCrosslinked();
     }
 
     isMonoLink() {
