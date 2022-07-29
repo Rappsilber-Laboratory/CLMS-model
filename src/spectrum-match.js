@@ -346,14 +346,18 @@ export class SpectrumMatch {
     }
 
     ionTypes() {
-        return this.containingModel.get("searches").get(this.searchId).ionTypes;
+        const search = this.containingModel.get("searches").get(this.searchId);
+        let ionTypes = [];
+        ionTypes = ionTypes.concat(search.config.fragmentation.cterm_ions);
+        ionTypes = ionTypes.concat(search.config.fragmentation.nterm_ions);
+        return ionTypes;
     }
 
     ionTypesString() {
         const ions = this.ionTypes();
         let returnString = "";
         for (let i = 0; i < ions.length; i++) {
-            let ion = ions[i].type;
+            let ion = ions[i];//.type;
             if (ion.indexOf("Ion") > 0) {
                 ion = ion.substring(0, ion.indexOf("Ion"));
             }
