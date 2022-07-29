@@ -370,20 +370,20 @@ export class SpectrumMatch {
     }
 
     getCrossLinker() {
-        if (this.crosslinker_id === -1) {
+        // if (this.crosslinker_id === -1) {
             return null;
-        }
-
-        const searches = this.containingModel.get("searches");
-        const search = searches.get(this.searchId);
-        const crosslinkers = search.crosslinkers;
-        const clCount = crosslinkers.length;
-        for (let c = 0; c < clCount; c++) {
-            const crosslinker = crosslinkers[c];
-            if (crosslinker.id == this.crosslinker_id) { // yes, they're different types, don't ===
-                return crosslinker;
-            }
-        }
+        // }
+        //
+        // const searches = this.containingModel.get("searches");
+        // const search = searches.get(this.searchId);
+        // const crosslinkers = search.crosslinkers;
+        // const clCount = crosslinkers.length;
+        // for (let c = 0; c < clCount; c++) {
+        //     const crosslinker = crosslinkers[c];
+        //     if (crosslinker.id == this.crosslinker_id) { // yes, they're different types, don't ===
+        //         return crosslinker;
+        //     }
+        // }
     }
 
     fragmentTolerance() {
