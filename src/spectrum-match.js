@@ -56,7 +56,7 @@ export class SpectrumMatch {
             this.matchedPeptides[0] = peptides.get("" + rawMatch.pi1);
             // following will be inadequate for trimeric and higher order cross-links
             if (!this.isNotCrosslinked()) {
-                this.matchedPeptides[1] = peptides.get(rawMatches[1].pi);
+                this.matchedPeptides[1] = peptides.get("" + rawMatch.pi2);
             }
         // } else { //*here - if its from a csv file use rawMatches as the matchedPep array,
         //     //makes it easier to construct as parsing CSV
@@ -170,7 +170,7 @@ export class SpectrumMatch {
 
         let fromProt, toProt;
 
-        if (this.isLinear()){//!p2ID || p2ID === "" || p2ID === '-' || p2ID === 'n/a') { //its  a linear peptide (no crosslinker of any product type))
+        if (this.isNotCrosslinked()){//!p2ID || p2ID === "" || p2ID === '-' || p2ID === 'n/a') { //its  a linear peptide (no crosslinker of any product type))
             this.containingModel.set("linearsPresent", true);
             fromProt = proteins.get(p1ID);
             if (!fromProt) {
@@ -227,7 +227,7 @@ export class SpectrumMatch {
             //to and from proteins were already swapped over above
 
             //WATCH OUT - residues need to be in correct order
-            if (this.isLinear()) {
+            if (this.isNotCrosslinked()) {
                 resLink = new Crosslink(crosslinkID, fromProt,
                     res1, null, null, this.containingModel);
             } else if (p1ID === p2ID) {
