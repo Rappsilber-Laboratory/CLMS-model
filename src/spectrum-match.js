@@ -67,24 +67,27 @@ export class SpectrumMatch {
             this.containingModel.set("unvalidatedPresent", true);
         }
 
-        if (peptides) { //this is a bit tricky, see below*
+        this.linkPos1 = +rawMatches[0].lp;
+        if (rawMatches[1]) {
+            this.linkPos2 = +rawMatches[1].lp;
+        }
+
+        // if (peptides) { //this is a bit tricky, see below*
             this.matchedPeptides = [];
             this.matchedPeptides[0] = peptides.get(rawMatches[0].pi);
             // following will be inadequate for trimeric and higher order cross-links
             if (!this.isNotCrosslinked()) {
                 this.matchedPeptides[1] = peptides.get(rawMatches[1].pi);
             }
-        } else { //*here - if its from a csv file use rawMatches as the matchedPep array,
-            //makes it easier to construct as parsing CSV
-            this.matchedPeptides = rawMatches;
-        }
+        // }
+        // this can go i think
+        // else { //*here - if its from a csv file use rawMatches as the matchedPep array,
+        //     //makes it easier to construct as parsing CSV
+        //     this.matchedPeptides = rawMatches;
+        // }
 
         //if the match is ambiguous it will relate to many crosslinks
         this.crosslinks = [];
-        this.linkPos1 = +rawMatches[0].lp;
-        if (rawMatches[1]) {
-            this.linkPos2 = +rawMatches[1].lp;
-        }
 
         // the protein IDs and residue numers we eventually want to get:-
         let p1ID, p2ID, res1, res2;
