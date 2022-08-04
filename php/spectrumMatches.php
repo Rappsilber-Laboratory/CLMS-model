@@ -1,23 +1,5 @@
 <?php
 
-//  CLMS-UI
-//  Copyright 2015 Colin Combe, Rappsilber Laboratory, Edinburgh University
-//
-//  This file is part of CLMS-UI.
-//
-//  CLMS-UI is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  CLMS-UI is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with CLMS-UI.  If not, see <http://www.gnu.org/licenses/>.
-
 //$pageStartTime = microtime(true);
 
 header("Cache-Control: max-age=25920000, private"); //300days (60sec * 60min * 24hours * 300days)
@@ -365,27 +347,29 @@ if (count($_GET) > 0) {
 
     //interactors
     $interactors = [];
-    $interactorQuery = "SELECT accession, sequence, gene, array_to_json(keywords) as keywords, array_to_json(comments) as comments, features, array_to_json(go) AS go FROM uniprot WHERE accession IN ('"             .implode(array_keys($interactorAccs), "','")."');";
-     try {
-         // @ stops pg_connect echo'ing out failure messages that knacker the returned data
-         $interactorDbConn = @pg_connect($interactionConnection);
-         if ($interactorDbConn) {
-             $interactorResult = pg_query($interactorQuery);
-             $line = pg_fetch_array($interactorResult, null, PGSQL_ASSOC);
-             while ($line) {
-                 $line["features"] = json_decode($line["features"]);
-                 $line["go"] = json_decode($line["go"]);
-                 $line["keywords"] = json_decode($line["keywords"]);
-                 $line["comments"] = json_decode($line["comments"]);
-                 $line["gene"] = $line["gene"];
-                 $interactors[$line["accession"]] = $line;
+    if ($interactionConnection) {
+        $interactorQuery = "SELECT accession, sequence, gene, array_to_json(keywords) as keywords, array_to_json(comments) as comments, features, array_to_json(go) AS go FROM uniprot WHERE accession IN ('"             .implode(array_keys($interactorAccs), "','")."');";
+        try {
+            // @ stops pg_connect echo'ing out failure messages that knacker the returned data
+             $interactorDbConn = @pg_connect($interactionConnection);
+             if ($interactorDbConn) {
+                 $interactorResult = pg_query($interactorQuery);
                  $line = pg_fetch_array($interactorResult, null, PGSQL_ASSOC);
+                 while ($line) {
+                     $line["features"] = json_decode($line["features"]);
+                     $line["go"] = json_decode($line["go"]);
+                     $line["keywords"] = json_decode($line["keywords"]);
+                     $line["comments"] = json_decode($line["comments"]);
+                     $line["gene"] = $line["gene"];
+                     $interactors[$line["accession"]] = $line;
+                     $line = pg_fetch_array($interactorResult, null, PGSQL_ASSOC);
+                 }
+             } else {
+                 throw new Exception("Could not connect to interaction database");
              }
-         } else {
-             throw new Exception("Could not connect to interaction database");
+         } catch (Exception $e) {
+             $output["error"] = "Could not connect to uniprot interactor database";
          }
-     } catch (Exception $e) {
-         $output["error"] = "Could not connect to uniprot interactor database";
      }
     $output["interactors"] = $interactors;
 

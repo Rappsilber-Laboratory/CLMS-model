@@ -218,7 +218,7 @@ export class SpectrumMatch {
         // again, order id string by prot id or by residue if self-link
         let endsReversedInResLinkId = false;
         let crosslinkID;
-        if (this.isLinear()) {
+        if (this.isNotCrosslinked()) {
             crosslinkID = p1ID + "_linears";
         } else if (p1ID === p2ID || p2ID === null) {
             if ((res1 - 0) < (res2 - 0) || res2 === null) {
@@ -304,7 +304,7 @@ export class SpectrumMatch {
         }
     }
 
-    isLinear() {
+    isNotCrosslinked() {
         return this.linkPos1 === -1;
     }
 
