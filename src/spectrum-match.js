@@ -73,12 +73,12 @@ export class SpectrumMatch {
         }
 
         // if (peptides) { //this is a bit tricky, see below*
-            this.matchedPeptides = [];
-            this.matchedPeptides[0] = peptides.get(rawMatches[0].pi);
-            // following will be inadequate for trimeric and higher order cross-links
-            if (!this.isNotCrosslinked()) {
-                this.matchedPeptides[1] = peptides.get(rawMatches[1].pi);
-            }
+        this.matchedPeptides = [];
+        this.matchedPeptides[0] = peptides.get(rawMatches[0].pi);
+        // following will be inadequate for trimeric and higher order cross-links
+        if (!this.isNotCrosslinked()) {
+            this.matchedPeptides[1] = peptides.get(rawMatches[1].pi);
+        }
         // }
         // this can go i think
         // else { //*here - if its from a csv file use rawMatches as the matchedPep array,
