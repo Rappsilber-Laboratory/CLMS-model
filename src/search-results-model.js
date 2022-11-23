@@ -311,8 +311,9 @@ export class SearchResultsModel extends Backbone.Model {
 
         protObj.form = 0;
 
-        //take out organism abbreviation after underscore from names
-        if (protObj.name.indexOf("_") !== -1) {
+        if (!protObj.name && protObj.accession){
+            protObj.name = protObj.accession;
+        } else if (protObj.name.indexOf("_") !== -1) { //take out organism abbreviation after underscore from names
             protObj.name = protObj.name.substring(0, protObj.name.indexOf("_"));
         }
         protObj.getMeta = function (metaField) {
