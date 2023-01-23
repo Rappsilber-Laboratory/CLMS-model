@@ -57,6 +57,7 @@ export class Peptide {
     }
 
     get seq_mods() {
+        return this._pep.base_seq;
         let seq_mods = "";
         let lastIndex = 0;
         for (let i = 0; i < this._pep.mod_pos.length; i++){

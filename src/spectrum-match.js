@@ -19,7 +19,7 @@ export class SpectrumMatch {
             this.containingModel.get("scoreSets").add(scoreSet);
         }
 
-        this.passThreshold = (identification.pass == "t");
+        this.passThreshold = !!identification.pass;
         if (identification.ions) {
             var ionTypes = identification.ions.split(";");
             var ionTypeCount = ionTypes.length;
@@ -325,6 +325,7 @@ export class SpectrumMatch {
     }
 
     group() {
+        return -1; // temp
         var group = this.containingModel.get("searches").get(this.searchId).group;
         return group;
     }
@@ -395,6 +396,7 @@ export class SpectrumMatch {
     }
 
     modificationCount() {
+        return -1; //temp
         const modCount1 = this.matchedPeptides[0].mod_pos.length;
         if (this.matchedPeptides[1]) {
             const modCount2 = this.matchedPeptides[1].mod_pos.length;

@@ -36,9 +36,9 @@ export class SearchResultsModel extends Backbone.Model {
             //modifications
             // short term hack - index mod names by accession
             const modificationNames = new Map();
-            for (let mod of json.modifications){
-                modificationNames.set(mod.accession, mod.mod_name);
-            }
+            // for (let mod of json.modifications){
+            //     modificationNames.set(mod.accession, mod.mod_name);
+            // }
             this.set("modificationNames", modificationNames);
 
             //search meta data
@@ -141,11 +141,11 @@ export class SearchResultsModel extends Backbone.Model {
             //spectrum sources
             var spectrumSources = new Map();
             var specSource;
-            var specCount = json.spectra.length;
-            for (var sp = 0; sp < specCount; sp++) {
-                specSource = json.spectra[sp];
-                spectrumSources.set(specSource.up_id + "_" + specSource.id, specSource);
-            }
+            // var specCount = json.spectra.length;
+            // for (var sp = 0; sp < specCount; sp++) {
+            //     specSource = json.spectra[sp];
+            //     spectrumSources.set(specSource.up_id + "_" + specSource.id, specSource);
+            // }
             this.set("spectrumSources", spectrumSources);
 
             var participants = this.get("participants");
@@ -179,23 +179,22 @@ export class SearchResultsModel extends Backbone.Model {
 
             var crosslinks = this.get("crosslinks");
 
+            const rawMatches = json.matches;
             var minScore = undefined;
             var maxScore = undefined;
 
             // moved from modelUtils 05/08/19
             // Connect searches to proteins, and add the protein set as a property of a search in the clmsModel, MJG 17/05/17
-            var searchMap = this.getProteinSearchMap(json.peptides, json.rawMatches || json.identifications);
+            const searchMap = this.getProteinSearchMap(json.peptides, json.matches || json.identifications);
             this.get("searches").forEach(function (value, key) {
                 value.participantIDSet = searchMap[key];
             });
 
-            if (json.identifications) {
-                var matches = this.get("matches");
 
-                var l = json.identifications.length;
-                for (var i = 0; i < l; i++) {
-                    var match = new SpectrumMatch(this, participants, crosslinks, peptides, json.identifications[i]);
-
+            if (rawMatches) {
+                const matches = this.get("matches");
+                for (let rawMatch of rawMatches) {
+                    const match = new SpectrumMatch(this, participants, crosslinks, peptides, rawMatch);
                     matches.push(match);
 
                     if (maxScore === undefined || match.score() > maxScore) {
@@ -260,15 +259,17 @@ export class SearchResultsModel extends Backbone.Model {
             protObj.crosslinks = [];
         }
         protObj.is_decoy = false;
-        var accCheck = protObj.accession.match(SearchResultsModel.commonRegexes.uniprotAccession);
-        if (protObj.seq_mods) {
-            SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
-            protObj.sequence = protObj.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
-        } else if (accCheck != null && json.interactors[protObj.accession]) {
-            protObj.sequence = json.interactors[protObj.accession].sequence;
-        } else {
-            protObj.sequence = "";
-        }
+        // var accCheck = protObj.accession.match(SearchResultsModel.commonRegexes.uniprotAccession);
+        // if (protObj.seq_mods) {
+        //     SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
+        //     protObj.sequence = protObj.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
+        // }
+        // else if (accCheck != null && json.interactors[protObj.accession]) {
+        //     protObj.sequence = json.interactors[protObj.accession].sequence;
+        // }
+        // else {
+        //     protObj.sequence = "";
+        // }
         protObj.size = protObj.sequence.length;
 
         protObj.form = 0;
