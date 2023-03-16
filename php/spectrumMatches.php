@@ -1,23 +1,4 @@
 <?php
-
-//  CLMS-UI
-//  Copyright 2015 Colin Combe, Rappsilber Laboratory, Edinburgh University
-//
-//  This file is part of CLMS-UI.
-//
-//  CLMS-UI is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  CLMS-UI is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with CLMS-UI.  If not, see <http://www.gnu.org/licenses/>.
-
 //$pageStartTime = microtime(true);
 
 header("Cache-Control: max-age=25920000, private"); //300days (60sec * 60min * 24hours * 300days)
@@ -39,7 +20,14 @@ if (count($_GET) > 0) {
             }
         }
 
-        $linears = false;
+        $auto = false;
+        if (isset($_GET['auto'])) {
+            if ($_GET['auto'] === '1' || $_GET['auto'] === '0') {
+                $auto = (bool) $_GET['auto'];
+            }
+        }
+
+            $linears = false;
         if (isset($_GET['linears'])) {
             if ($_GET['linears'] === '1' || $_GET['linears'] === '0') {
                 $linears = (bool) $_GET['linears'];
@@ -317,9 +305,14 @@ if (count($_GET) > 0) {
             // }
 
             if ($unval == false) {
-                $WHERE_spectrumMatch = $WHERE_spectrumMatch." AND ((sm.autovalidated = true AND (sm.rejected != true OR sm.rejected is null)) OR
+                if ($auto == false) {
+                    $WHERE_spectrumMatch = $WHERE_spectrumMatch . " AND (
                             (sm.validated LIKE 'A') OR (sm.validated LIKE 'B') OR (sm.validated LIKE 'C')
                             OR (sm.validated LIKE '?')) ";
+                } else {
+                    $WHERE_spectrumMatch = $WHERE_spectrumMatch . " AND (sm.autovalidated = true) ";
+//                (sm.autovalidated = true AND (sm.rejected != true OR sm.rejected is null)
+                }
             }
 
 
@@ -361,6 +354,10 @@ if (count($_GET) > 0) {
                 INNER JOIN spectrum sp ON sm.spectrum_id = sp.id
                         ORDER BY score DESC, sm.id;";
         //}
+//
+//            echo $query;
+//            echo "\n";
+
 
             $res = pg_query($query) or die('{"error": "Query failed: ' . pg_last_error().'"}');
             $times["matchQueryDone"] = microtime(true) - $zz;
@@ -560,8 +557,8 @@ if (count($_GET) > 0) {
                             description, accession_number as accession, sequence as seq_mods, is_decoy
                         FROM protein WHERE id IN ('".implode(array_keys($dbIds), "','")."')";
                 $res = pg_query($query) or die('Query failed: ' . pg_last_error());
-                    $times["proteinQuery"] = microtime(true) - $zz;
-                    $zz = microtime(true);
+                $times["proteinQuery"] = microtime(true) - $zz;
+                $zz = microtime(true);
                 $interactorAccs = [];
 
                     $line = pg_fetch_assoc($res);
@@ -577,31 +574,34 @@ if (count($_GET) > 0) {
 
                 }
                 $output["proteins"] = $proteins;
-                    $times["proteinQueryToArray"] = microtime(true) - $zz;
+                $times["proteinQueryToArray"] = microtime(true) - $zz;
                 $zz = microtime(true);
 
                 //interactors
                 $interactors = [];
-//                 $interactorQuery = "SELECT accession, sequence, features, array_to_json(go) AS go FROM uniprot_trembl WHERE accession IN ('"
-//                         .implode(array_keys($interactorAccs), "','")."');";
-//                 try {
-//                     // @ stops pg_connect echo'ing out failure messages that knacker the returned data
-//                     $interactorDbConn = @pg_connect($interactionConnection);
-//                     if ($interactorDbConn) {
-//                         $interactorResult = pg_query($interactorQuery);
-//                         $line = pg_fetch_array($interactorResult, null, PGSQL_ASSOC);
-//                         while ($line) {
-//                             $line["features"] = json_decode($line["features"]);
-//                             $line["go"] = json_decode($line["go"]);
-//                             $interactors[$line["accession"]] = $line;
-//                             $line = pg_fetch_array($interactorResult, null, PGSQL_ASSOC);
-//                         }
-//                     } else {
-//                         throw new Exception("Could not connect to uniprot interactor database");
-//                     }
-//                 } catch (Exception $e) {
-//                     $output["warn"] = "Could not connect to uniprot interactor database";
-//                 }
+                $interactorQuery = "SELECT accession, sequence, gene, array_to_json(keywords) as keywords, array_to_json(comments) as comments, features, array_to_json(go) AS go FROM uniprot WHERE accession IN ('"
+                    .implode(array_keys($interactorAccs), "','")."');";
+                try {
+                    // @ stops pg_connect echo'ing out failure messages that knacker the returned data
+                    $interactorDbConn = @pg_connect($interactionConnection);
+                    if ($interactorDbConn) {
+                        $interactorResult = pg_query($interactorQuery);
+                        $line = pg_fetch_array($interactorResult, null, PGSQL_ASSOC);
+                        while ($line) {
+                            $line["features"] = json_decode($line["features"]);
+                            $line["go"] = json_decode($line["go"]);
+                            $line["keywords"] = json_decode($line["keywords"]);
+                            $line["comments"] = json_decode($line["comments"]);
+                            $line["gene"] = $line["gene"];
+                            $interactors[$line["accession"]] = $line;
+                            $line = pg_fetch_array($interactorResult, null, PGSQL_ASSOC);
+                        }
+                    } else {
+                        throw new Exception("Could not connect to interaction database");
+                    }
+                } catch (Exception $e) {
+                    $output["error"] = "Could not connect to uniprot interactor database";
+                }
                 $output["interactors"] = $interactors;
                 $times["uniprotQuery"] = microtime(true) - $zz;
                 $zz = microtime(true);
@@ -618,7 +618,7 @@ if (count($_GET) > 0) {
         $output["timeStamp"] = $_SERVER["REQUEST_TIME"];
 
         // Free resultset
-        pg_free_result($res);
+//        pg_free_result($res);
         } catch (Exception $e) {
             $output["error"] = $e;
         }
