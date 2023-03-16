@@ -449,7 +449,8 @@ if (count($_GET) > 0) {
              */
             $spectrumSources = [];
             if (sizeof($sourceIds) > 0) {
-                $implodedSourceIds = '('.implode(array_keys($sourceIds), ",").')';
+                $keys = array_keys($sourceIds);
+                $implodedSourceIds = '('.implode(",", $keys).')';
                 $query = "SELECT src.id, src.name
                     FROM spectrum_source AS src WHERE src.id IN "
                             .$implodedSourceIds.";";
@@ -465,7 +466,7 @@ if (count($_GET) > 0) {
              */
             $peakListFiles = [];
             if (isset ($peakListIds) && sizeof($peakListIds) > 0) {
-                $implodedPeakListIds = '('.implode(array_keys($peakListIds), ",").')';
+                $implodedPeakListIds = '('.implode(",", array_keys($peakListIds)).')';
                 $query = "SELECT plf.id, plf.name
                     FROM peaklistfile AS plf WHERE plf.id IN "
                             .$implodedPeakListIds.";";
@@ -489,7 +490,7 @@ if (count($_GET) > 0) {
             $peptides = [];
                 $dbIds = [];
             if (sizeof($peptideIds) > 0) {
-                $implodedPepIds = '('.implode(array_keys($peptideIds), ",").')';
+                $implodedPepIds = '('.implode(",", array_keys($peptideIds)).')';
                 $query = "SELECT pep.id, (array_agg(pep.sequence))[1] as sequence,
                         string_agg(".$proteinIdField."::text,',') as proteins, string_agg(hp.protein_id::text,',') as test, json_agg(hp.peptide_position + 1) as positions
                     FROM (SELECT id, sequence FROM peptide WHERE id IN "
@@ -555,7 +556,7 @@ if (count($_GET) > 0) {
                         CASE WHEN name IS NULL OR name = '' OR name = 'REV_' OR name = 'RAN_' THEN accession_number
                         ELSE name END AS name,
                             description, accession_number as accession, sequence as seq_mods, is_decoy
-                        FROM protein WHERE id IN ('".implode(array_keys($dbIds), "','")."')";
+                        FROM protein WHERE id IN ('".implode("','", array_keys($dbIds))."')";
                 $res = pg_query($query) or die('Query failed: ' . pg_last_error());
                 $times["proteinQuery"] = microtime(true) - $zz;
                 $zz = microtime(true);
@@ -580,7 +581,7 @@ if (count($_GET) > 0) {
                 //interactors
                 $interactors = [];
                 $interactorQuery = "SELECT accession, sequence, gene, array_to_json(keywords) as keywords, array_to_json(comments) as comments, features, array_to_json(go) AS go FROM uniprot WHERE accession IN ('"
-                    .implode(array_keys($interactorAccs), "','")."');";
+                    .implode("','", array_keys($interactorAccs))."');";
                 try {
                     // @ stops pg_connect echo'ing out failure messages that knacker the returned data
                     $interactorDbConn = @pg_connect($interactionConnection);
