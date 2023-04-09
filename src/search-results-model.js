@@ -178,7 +178,11 @@ export class SearchResultsModel extends Backbone.Model {
 
                     for (var p = 0; p < peptide.prt.length; p++) {
                         if (peptide.is_decoy[p]) {
-                            participants.get(peptide.prt[p]).is_decoy = true;
+                            const protein = participants.get(peptide.prt[p]);
+                            if (!protein) {
+                                console.error("Protein not found for peptide", peptide, peptide.prt[p]);
+                            }
+                            protein.is_decoy = true;
                             this.set("decoysPresent", true);
                         }
                     }
