@@ -1,6 +1,6 @@
 <?php
 
-include_once('../../vendor/php/utils.php');
+include_once('../../xiNET_website/php/utils.php');
 
 if (count($_GET) > 0) {
     $sid = urldecode($_GET["upload"]);
