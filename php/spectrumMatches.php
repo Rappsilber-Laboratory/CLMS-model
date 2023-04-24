@@ -5,11 +5,9 @@
 header("Cache-Control: max-age=25920000, private"); //300days (60sec * 60min * 24hours * 300days)
 
 if (count($_GET) > 0) {
-    include('../../xiSpecConfig.php');
+    include('../../xiviewConfig.php');
     $dbconn = pg_connect($connectionString) or die('Could not connect: ' . pg_last_error());
-    if ($interactionConnection) {
-        $interactorDbConn = @pg_connect($interactionConnection);
-    }
+
 
     $uploadId = urldecode($_GET["upload"]);
 
@@ -354,7 +352,8 @@ if (count($_GET) > 0) {
         $interactorQuery = "SELECT accession, sequence, gene, array_to_json(keywords) as keywords, array_to_json(comments) as comments, features, array_to_json(go) AS go FROM uniprot WHERE accession IN ('"             .implode(array_keys($interactorAccs), "','")."');";
         try {
             // @ stops pg_connect echo'ing out failure messages that knacker the returned data
-             if ($interactorDbConn) {
+            $interactorDbConn = @pg_connect($interactionConnection);
+            if ($interactorDbConn) {
                  $interactorResult = pg_query($interactorQuery);
                  $line = pg_fetch_array($interactorResult, null, PGSQL_ASSOC);
                  while ($line) {
