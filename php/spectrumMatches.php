@@ -57,7 +57,7 @@ if (count($_GET) > 0) {
 
         $searchDataQuery = "SELECT up.id, up.peak_list_file_names, up.analysis_software, up.provider, 
                     up.audits, up.samples, up.analyses, up.protocol, up.bib, up.spectra_formats, 
-                     up.upload_warnings, up.random_id, us.user_name FROM upload as up INNER JOIN useraccount as us on (up.user_id = us.id) where up.id =  '".$id."';";
+                     up.upload_warnings, up.random_id, up.identification_file_name, us.user_name FROM upload as up INNER JOIN useraccount as us on (up.user_id = us.id) where up.id =  '".$id."';";
 
         $res = pg_query($searchDataQuery)
                     or die('Query failed: ' . pg_last_error());
@@ -190,7 +190,7 @@ if (count($_GET) > 0) {
     //~ echo '/*php time: '.($endTime - $startTime)."ms\n\n";
 
     /*
-     * SPECTRA
+     * SPECTRA - TODO - this might be inefficient
      */
     $query = "SELECT id, upload_id, peak_list_file_name, scan_id, frag_tol,  (mz is not null) as pks FROM spectra WHERE ".$WHERE_uploadClause.";";
     $startTime = microtime(true);
@@ -225,9 +225,9 @@ if (count($_GET) > 0) {
     * PEPTIDES (including PEPTIDE EVIDENCES)
     */
     $proteinIdField = "dbsequence_ref";
-    if (count($searchId_randomId) > 1) {
-        $proteinIdField = "protein_accession";
-    }
+//    if (count($searchId_randomId) > 1) {
+//        $proteinIdField = "protein_accession";
+//    }
     $query = "SELECT * FROM peptides as p left join (
          select peptide_ref, array_agg(".$proteinIdField.") as proteins,
                 array_agg(pep_start) as positions,
@@ -297,9 +297,9 @@ if (count($_GET) > 0) {
      */
 
     $proteinIdField = "id";
-    if (count($searchId_randomId) > 1) {
-        $proteinIdField = "accession";
-    }
+//    if (count($searchId_randomId) > 1) {
+//        $proteinIdField = "accession";
+//    }
 
     $query = "SELECT * FROM db_sequences WHERE ".$WHERE_uploadClause.";";
 

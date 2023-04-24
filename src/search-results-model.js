@@ -152,41 +152,77 @@ export class SearchResultsModel extends Backbone.Model {
             }
             this.set("spectrumSources", spectrumSources);
 
-            var participants = this.get("participants");
-            if (json.proteins) {
-                var proteins = json.proteins;
-                var proteinCount = proteins.length;
-                var participant;
-                for (var p = 0; p < proteinCount; p++) {
-                    participant = proteins[p];
-                    this.initProtein(participant, json);
-                    participants.set(participant.id, participant);
+            const participants = this.get("participants");
+
+            if (!this.isAggregatedData()){
+                if (json.proteins) {
+                    for (let participant of json.proteins) {
+                        this.initProtein(participant, json);
+                        participants.set(participant.id, participant);
+                    }
                 }
-            }
-
-            //peptides
-            var peptides = new Map();
-            if (json.peptides) {
-                var peptideArray = json.peptides;
-                var pepCount = peptideArray.length;
-                var peptide;
-                for (var pep = 0; pep < pepCount; pep++) {
-                    SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
-                    peptide = peptideArray[pep];
-                    peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
-                    peptides.set(peptide.u_id + "_" + peptide.id, peptide); // concat upload_id and peptide.id
-
-                    for (var p = 0; p < peptide.prt.length; p++) {
-                        if (peptide.is_decoy[p]) {
-                            const protein = participants.get(peptide.prt[p]);
-                            if (!protein) {
-                                console.error("Protein not found for peptide", peptide, peptide.prt[p]);
+                //peptides
+                var peptides = new Map();
+                if (json.peptides) {
+                    for (let peptide of json.peptides) {
+                        SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
+                        peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
+                        peptides.set(peptide.u_id + "_" + peptide.id, peptide); // concat upload_id and peptide.id
+                        for (var p = 0; p < peptide.prt.length; p++) {
+                            if (peptide.is_decoy[p]) {
+                                const protein = participants.get(peptide.prt[p]);
+                                if (!protein) {
+                                    console.error("Protein not found for peptide (not aggregated data)", peptide, peptide.prt[p]);
+                                }
+                                protein.is_decoy = true;
+                                this.set("decoysPresent", true);
                             }
-                            protein.is_decoy = true;
-                            this.set("decoysPresent", true);
                         }
                     }
                 }
+            } else {
+                var tempParticipants = new Map();
+                if (json.proteins) {
+                    for (let participant of json.proteins) {
+                        this.initProtein(participant, json);
+                        tempParticipants.set(participant.id, participant);
+                    }
+                }
+                //peptides
+                var peptides = new Map();
+                if (json.peptides) {
+                    for (let peptide of json.peptides) {
+                        SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
+                        peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
+                        peptides.set(peptide.u_id + "_" + peptide.id, peptide); // concat upload_id and peptide.id
+
+                        for (var p = 0; p < peptide.prt.length; p++) {
+                            const protein = tempParticipants.get(peptide.prt[p]);
+                            if (!protein) {
+                                console.error("Protein not found for peptide (aggregated data)", peptide, peptide.prt[p]);
+                            }
+                            if (peptide.is_decoy[p]) {
+                                const decoyId = "DECOY_" + protein.accession;
+                                protein.is_decoy = true;
+                                protein.id = decoyId;
+                                // how to get prot acc after id has been changed?
+                                peptide.prt[p] = decoyId;
+                                this.set("decoysPresent", true);
+                            } else {
+                                // fix ids for target in aggregated data
+                                protein.id = protein.accession;
+                                peptide.prt[p] = protein.accession;
+
+                            }
+
+                        }
+                    }
+                }
+
+                for (let participant of tempParticipants.values()) {
+                    participants.set(participant.id, participant);
+                }
+
             }
 
             this.initDecoyLookup();
@@ -405,23 +441,8 @@ export class SearchResultsModel extends Backbone.Model {
         this.targetProteinCount = prots.length - decoys.length;
     }
 
-    isMatchingProteinPair(prot1, prot2) {
-        return prot1 && prot2 && prot1.targetProteinID === prot2.targetProteinID;
-    }
-
-    /*
-        isMatchingProteinPairFromIDs: function(prot1ID, prot2ID) {
-            if (prot1ID === prot2ID) {
-                return true;
-            }
-            const participants = this.get("participants");
-            const prot1 = participants.get(prot1ID);
-            const prot2 = participants.get(prot2ID);
-            return this.isMatchingProteinPair(prot1, prot2);
-        },
-    */
-    isSelfLink(crosslink) {
-        return crosslink.isSelfLink();
+    isAggregatedData() {
+        return this.get("searches").size > 1;
     }
 
     getSearchRandomId(match) {
