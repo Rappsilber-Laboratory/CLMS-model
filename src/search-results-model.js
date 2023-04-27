@@ -479,6 +479,10 @@ export class SearchResultsModel extends Backbone.Model {
         return crosslink.isSelfLink();
     }
 
+    isAggregatedData() {
+        return this.get("searches").size > 1;
+    }
+
     getSearchRandomId(match) {
         const searchId = match.searchId;
         const searchMap = this.get("searches");
