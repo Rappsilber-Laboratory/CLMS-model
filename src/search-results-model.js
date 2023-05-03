@@ -274,10 +274,9 @@ export class SearchResultsModel extends Backbone.Model {
 
         protObj.form = 0;
 
-        //take out organism abbreviation after underscore from names
-        // if (protObj.name.indexOf("_") != -1) {
-        //     protObj.name = protObj.name.substring(0, protObj.name.indexOf("_"))
-        // }
+        if ((!protObj.name || protObj.name.trim() === '{"","protein description"}') && protObj.accession){
+            protObj.name = protObj.accession;
+        }
         protObj.getMeta = function (metaField) {
             if (arguments.length === 0) {
                 return this.meta;
@@ -388,23 +387,8 @@ export class SearchResultsModel extends Backbone.Model {
         this.targetProteinCount = prots.length - decoys.length;
     }
 
-    isMatchingProteinPair(prot1, prot2) {
-        return prot1 && prot2 && prot1.targetProteinID === prot2.targetProteinID;
-    }
-
-    /*
-        isMatchingProteinPairFromIDs: function(prot1ID, prot2ID) {
-            if (prot1ID === prot2ID) {
-                return true;
-            }
-            const participants = this.get("participants");
-            const prot1 = participants.get(prot1ID);
-            const prot2 = participants.get(prot2ID);
-            return this.isMatchingProteinPair(prot1, prot2);
-        },
-    */
-    isSelfLink(crosslink) {
-        return crosslink.isSelfLink();
+    isAggregatedData() {
+        return this.get("searches").size > 1;
     }
 
     getSearchRandomId(match) {
