@@ -196,7 +196,7 @@ export class SpectrumMatch {
             }
         }
 
-        if (this.containingModel.isMatchingProteinPair(fromProt, toProt)) {
+        if (fromProt && toProt && fromProt.targetProteinID === toProt.targetProteinID) {
             this.couldBelongToSelfLink = true;
         } else if (!this.isMonoLink()) {
             this.couldBelongToBetweenLink = true;
