@@ -8,6 +8,7 @@ export class SpectrumMatch {
         this.id = rawMatch.id;
         this.spectrumId = rawMatch.sp_id;
         this.searchId = rawMatch.si.toString();
+        this.resultSetId = rawMatch.rsi.toString();
         this.crosslinker_id = rawMatch.cl;
         // if (rawMatches[0].dc) {
         //     this.is_decoy = (rawMatches[0].dc === 't');
@@ -53,10 +54,10 @@ export class SpectrumMatch {
 
         // if (peptides) { //this is a bit tricky, see below*
             this.matchedPeptides = [];
-            this.matchedPeptides[0] = peptides.get("" + rawMatch.pi1);
+            this.matchedPeptides[0] = peptides.get(this.searchId + "-" + rawMatch.pi1);
             // following will be inadequate for trimeric and higher order cross-links
             if (!this.isNotCrosslinked()) {
-                this.matchedPeptides[1] = peptides.get("" + rawMatch.pi2);
+                this.matchedPeptides[1] = peptides.get(this.searchId + "-" + rawMatch.pi2);
             }
         // } else { //*here - if its from a csv file use rawMatches as the matchedPep array,
         //     //makes it easier to construct as parsing CSV
@@ -308,7 +309,7 @@ export class SpectrumMatch {
     }
 
     group() {
-        return this.containingModel.get("searches").get(this.searchId).group;
+        return this.containingModel.get("searches").get(this.resultSetId).group;
     }
 
     expMZ() {
@@ -346,7 +347,7 @@ export class SpectrumMatch {
     }
 
     ionTypes() {
-        const search = this.containingModel.get("searches").get(this.searchId);
+        const search = this.containingModel.get("searches").get(this.resultSetId);
         let ionTypes = [];
         ionTypes = ionTypes.concat(search.config.fragmentation.cterm_ions);
         ionTypes = ionTypes.concat(search.config.fragmentation.nterm_ions);
@@ -391,7 +392,7 @@ export class SpectrumMatch {
     }
 
     fragmentTolerance() {
-        const search = this.containingModel.get("searches").get(this.searchId);
+        const search = this.containingModel.get("searches").get(this.resultSetId);
         return {
             "tolerance": search.ms2tolerance,
             "unit": search.ms2toleranceunits
@@ -399,7 +400,7 @@ export class SpectrumMatch {
     }
 
     fragmentToleranceString() {
-        const search = this.containingModel.get("searches").get(this.searchId);
+        const search = this.containingModel.get("searches").get(this.resultSetId);
         return search.ms2tolerance + " " + search.ms2toleranceunits;
     }
 

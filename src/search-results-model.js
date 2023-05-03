@@ -216,7 +216,7 @@ export class SearchResultsModel extends Backbone.Model {
                     SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
                     peptide = peptideArray[pep];
                     peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
-                    peptides.set("" + peptide.id, peptide);
+                    peptides.set(peptide.search_id + "-" + peptide.id, peptide);
                 }
             }
 
@@ -278,10 +278,10 @@ export class SearchResultsModel extends Backbone.Model {
             peptideIDs.forEach(function (pepID) {
                 if (pepID) {
                     const prots = pepMap.get(pepID).prt;
-                    let searchToProts = searchMap[rawMatch.si];
+                    let searchToProts = searchMap[rawMatch.rsi];
                     if (!searchToProts) {
                         const newSet = d3.set();
-                        searchMap[rawMatch.si] = newSet;
+                        searchMap[rawMatch.rsi] = newSet;
                         searchToProts = newSet;
                     }
                     prots.forEach(function (prot) {
