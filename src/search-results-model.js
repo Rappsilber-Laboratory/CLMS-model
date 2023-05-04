@@ -278,10 +278,10 @@ export class SearchResultsModel extends Backbone.Model {
             peptideIDs.forEach(function (pepID) {
                 if (pepID) {
                     const prots = pepMap.get(pepID).prt;
-                    let searchToProts = searchMap[rawMatch.rsi];
+                    let searchToProts = searchMap[rawMatch.rs_id];
                     if (!searchToProts) {
                         const newSet = d3.set();
-                        searchMap[rawMatch.rsi] = newSet;
+                        searchMap[rawMatch.rs_id] = newSet;
                         searchToProts = newSet;
                     }
                     prots.forEach(function (prot) {

@@ -2,32 +2,24 @@ import {Crosslink} from "./crosslink";
 
 export class SpectrumMatch {
     constructor(containingModel, participants, crosslinks, peptides, rawMatch) {
-
         this.containingModel = containingModel; //containing BB model
+        this.rawMatch = rawMatch;
 
         this.id = rawMatch.id;
         this.spectrumId = rawMatch.sp_id;
         this.searchId = rawMatch.si.toString();
-        this.resultSetId = rawMatch.rsi.toString();
+        this.resultSetId = rawMatch.rs_id.toString();
         this.crosslinker_id = rawMatch.cl;
-        // if (rawMatches[0].dc) {
-        //     this.is_decoy = (rawMatches[0].dc === 't');
-        // }
-        // if (this.is_decoy === true) {
-        //     this.containingModel.set("decoysPresent", true);
-        // }
-        this.scanNumber = null;//+rawMatches[0].sn;
+
+        // this.scanNumber = null;//+rawMatches[0].sn;
         this.scanIndex = null;//+rawMatches[0].sc_i;
-        this.precursor_intensity = null;//+rawMatches[0].pc_i;
-        this.elution_time_start = null;//+rawMatches[0].e_s;
+        this.precursor_intensity = +rawMatch.pc_i;
+        this.elution_time_start = +rawMatch.rt;
         this.elution_time_end = null;//+rawMatches[0].e_e;
 
         this.src = null;//+rawMatches[0].src; //for looking up run name
         this.plf = null;//+rawMatches[0].plf; //for looking up peak list file name
         //run name may have come from csv file
-        // if (rawMatches[0].run_name) {
-        //     this.run_name = rawMatches[0].run_name;
-        // }
 
         this.precursorCharge = +rawMatch.pc_c;
         if (this.precursorCharge === -1) {
@@ -37,20 +29,7 @@ export class SpectrumMatch {
         this.precursorMZ = +rawMatch.pc_mz;
         this.calc_mass = +rawMatch.cm;
         this._score = +rawMatch.sc;
-        //autovalidated - another attribute
-        // if (rawMatches[0].av) {
-        //     this.autovalidated = rawMatches[0].av === "t";
-        //     this.containingModel.set("autoValidatedPresent", true);
-        // }
-        // // used in Rappsilber Lab to record manual validation status
-        // if (rawMatches[0].v) {
-        //     this.validated = rawMatches[0].v;
-        //     this.containingModel.set("manualValidatedPresent", true);
-        // }
-        //
-        // if (!this.autovalidated && !this.validated) {
-        //     this.containingModel.set("unvalidatedPresent", true);
-        // }
+
 
         // if (peptides) { //this is a bit tricky, see below*
             this.matchedPeptides = [];
@@ -309,7 +288,7 @@ export class SpectrumMatch {
     }
 
     group() {
-        return this.containingModel.get("searches").get(this.resultSetId).group;
+        return this.containingModel.get("searches").get(this.datasetId).group;
     }
 
     expMZ() {
@@ -349,8 +328,8 @@ export class SpectrumMatch {
     ionTypes() {
         const search = this.containingModel.get("searches").get(this.resultSetId);
         let ionTypes = [];
-        ionTypes = ionTypes.concat(search.config.fragmentation.cterm_ions);
-        ionTypes = ionTypes.concat(search.config.fragmentation.nterm_ions);
+        ionTypes = ionTypes.concat(search.s_config.fragmentation.cterm_ions);
+        ionTypes = ionTypes.concat(search.s_config.fragmentation.nterm_ions);
         return ionTypes;
     }
 
@@ -376,7 +355,7 @@ export class SpectrumMatch {
 
     getCrossLinker() {
         // if (this.crosslinker_id === -1) {
-            return null;
+        return null;
         // }
         //
         // const searches = this.containingModel.get("searches");
@@ -518,12 +497,41 @@ export class SpectrumMatch {
         return modCount1;
     }
 
+//     this.id = rawMatch.id;
+//     this.spectrumId = rawMatch.sp_id;
+//     this.searchId = rawMatch.si.toString();
+//     this.resultSetId = rawMatch.rsi.toString();
+//     this.crosslinker_id = rawMatch.cl;
+//
+//     // this.scanNumber = null;//+rawMatches[0].sn;
+//     this.scanIndex = null;//+rawMatches[0].sc_i;
+//     this.precursor_intensity = null;//+rawMatches[0].pc_i;
+//     this.elution_time_start = null;//+rawMatches[0].e_s;
+//     this.elution_time_end = null;//+rawMatches[0].e_e;
+//
+//     this.src = null;//+rawMatches[0].src; //for looking up run name
+//     this.plf = null;//+rawMatches[0].plf; //for looking up peak list file name
+//     //run name may have come from csv file
+//
+//     this.precursorCharge = +rawMatch.pc_c;
+//     if (this.precursorCharge === -1) {
+//     this.precursorCharge = undefined;
+// }
+//
+// this.precursorMZ = +rawMatch.pc_mz;
+// this.calc_mass = +rawMatch.cm;
+// this._score = +rawMatch.sc;
+
     get passThreshold() {
         return true;
     }
 
     get datasetId() {
         return this.resultSetId;
+    }
+
+    get scanNumber() {
+        return this.rawMatch.sn;
     }
 }
 
