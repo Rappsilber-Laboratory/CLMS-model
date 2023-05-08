@@ -1,53 +1,53 @@
 import {Crosslink} from "./crosslink";
 
 export class SpectrumMatch {
-    constructor(containingModel, participants, crosslinks, peptides, rawMatch) {
+    constructor(containingModel, participants, crosslinks, peptides, identification) {
         this.containingModel = containingModel; //containing BB model
-        this.rawMatch = rawMatch;
+        this.identification = identification;
 
-        this.id = rawMatch.id;
-        this.spectrumId = rawMatch.sp_id;
-        this.searchId = rawMatch.si.toString();
-        this.resultSetId = rawMatch.rs_id.toString();
-        this.crosslinker_id = rawMatch.cl;
+        this.id = identification.id;
+        this.spectrumId = identification.sp_id;
+        this.searchId = identification.si.toString();
+        this.resultSetId = identification.rs_id.toString();
+        this.crosslinker_id = identification.cl;
 
-        // this.scanNumber = null;//+rawMatches[0].sn;
-        this.scanIndex = null;//+rawMatches[0].sc_i;
-        this.precursor_intensity = +rawMatch.pc_i;
-        this.elution_time_start = +rawMatch.rt;
-        this.elution_time_end = null;//+rawMatches[0].e_e;
+        // this.scanNumber = null;//+identificationes[0].sn;
+        this.scanIndex = null;//+identificationes[0].sc_i;
+        this.precursor_intensity = +identification.pc_i;
+        this.elution_time_start = +identification.rt;
+        this.elution_time_end = null;//+identificationes[0].e_e;
 
-        this.src = null;//+rawMatches[0].src; //for looking up run name
-        this.plf = null;//+rawMatches[0].plf; //for looking up peak list file name
+        this.src = null;//+identificationes[0].src; //for looking up run name
+        this.plf = null;//+identificationes[0].plf; //for looking up peak list file name
         //run name may have come from csv file
 
-        this.precursorCharge = +rawMatch.pc_c;
+        this.precursorCharge = +identification.pc_c;
         if (this.precursorCharge === -1) {
             this.precursorCharge = undefined;
         }
 
-        this.precursorMZ = +rawMatch.pc_mz;
-        this.calc_mass = +rawMatch.cm;
-        this._score = +rawMatch.sc;
+        this.precursorMZ = +identification.pc_mz;
+        this.calc_mass = +identification.cm;
+        this._score = +identification.sc;
 
 
         // if (peptides) { //this is a bit tricky, see below*
             this.matchedPeptides = [];
-            this.matchedPeptides[0] = peptides.get(this.searchId + "-" + rawMatch.pi1);
+            this.matchedPeptides[0] = peptides.get(this.searchId + "-" + identification.pi1);
             // following will be inadequate for trimeric and higher order cross-links
             if (!this.isNotCrosslinked()) {
-                this.matchedPeptides[1] = peptides.get(this.searchId + "-" + rawMatch.pi2);
+                this.matchedPeptides[1] = peptides.get(this.searchId + "-" + identification.pi2);
             }
-        // } else { //*here - if its from a csv file use rawMatches as the matchedPep array,
+        // } else { //*here - if its from a csv file use identificationes as the matchedPep array,
         //     //makes it easier to construct as parsing CSV
-        //     this.matchedPeptides = rawMatches;
+        //     this.matchedPeptides = identificationes;
         // }
 
         //if the match is ambiguous it will relate to many crosslinks
         this.crosslinks = [];
-        this.linkPos1 = +rawMatch.s1;
-        // if (rawMatch.s2) {
-            this.linkPos2 = +rawMatch.s2;
+        this.linkPos1 = +identification.s1;
+        // if (identification.s2) {
+            this.linkPos2 = +identification.s2;
         // }
 
         // the protein IDs and residue numers we eventually want to get:-
@@ -497,30 +497,30 @@ export class SpectrumMatch {
         return modCount1;
     }
 
-//     this.id = rawMatch.id;
-//     this.spectrumId = rawMatch.sp_id;
-//     this.searchId = rawMatch.si.toString();
-//     this.resultSetId = rawMatch.rsi.toString();
-//     this.crosslinker_id = rawMatch.cl;
+//     this.id = identification.id;
+//     this.spectrumId = identification.sp_id;
+//     this.searchId = identification.si.toString();
+//     this.resultSetId = identification.rsi.toString();
+//     this.crosslinker_id = identification.cl;
 //
-//     // this.scanNumber = null;//+rawMatches[0].sn;
-//     this.scanIndex = null;//+rawMatches[0].sc_i;
-//     this.precursor_intensity = null;//+rawMatches[0].pc_i;
-//     this.elution_time_start = null;//+rawMatches[0].e_s;
-//     this.elution_time_end = null;//+rawMatches[0].e_e;
+//     // this.scanNumber = null;//+identificationes[0].sn;
+//     this.scanIndex = null;//+identificationes[0].sc_i;
+//     this.precursor_intensity = null;//+identificationes[0].pc_i;
+//     this.elution_time_start = null;//+identificationes[0].e_s;
+//     this.elution_time_end = null;//+identificationes[0].e_e;
 //
-//     this.src = null;//+rawMatches[0].src; //for looking up run name
-//     this.plf = null;//+rawMatches[0].plf; //for looking up peak list file name
+//     this.src = null;//+identificationes[0].src; //for looking up run name
+//     this.plf = null;//+identificationes[0].plf; //for looking up peak list file name
 //     //run name may have come from csv file
 //
-//     this.precursorCharge = +rawMatch.pc_c;
+//     this.precursorCharge = +identification.pc_c;
 //     if (this.precursorCharge === -1) {
 //     this.precursorCharge = undefined;
 // }
 //
-// this.precursorMZ = +rawMatch.pc_mz;
-// this.calc_mass = +rawMatch.cm;
-// this._score = +rawMatch.sc;
+// this.precursorMZ = +identification.pc_mz;
+// this.calc_mass = +identification.cm;
+// this._score = +identification.sc;
 
     get passThreshold() {
         return true;
@@ -531,7 +531,7 @@ export class SpectrumMatch {
     }
 
     get scanNumber() {
-        return this.rawMatch.sn;
+        return this.identification.sn;
     }
 }
 
