@@ -184,7 +184,7 @@ if (count($_GET) > 0) {
         // if ($line) {echo ",\n";}
     }
     // echo "\n],\n";
-    $output["identifications"] = $identifications;
+    $output["matches"] = $identifications;
     // Free resultset
     pg_free_result($res);
     $endTime = microtime(true);
