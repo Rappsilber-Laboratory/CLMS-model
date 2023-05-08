@@ -348,7 +348,8 @@ if (count($_GET) > 0) {
     $output["proteins"] = $proteins;
     // Free resultset
     pg_free_result($res);
-
+    pg_close($dbconn);
+    
     //interactors
     $interactors = [];
     if (isset($interactionConnection)) {
@@ -377,7 +378,6 @@ if (count($_GET) > 0) {
             // Free resultset
             pg_free_result($interactorResult);
             // Closing connection
-            pg_close($dbconn);
             if (isset($interactorDbConn)) {
                 pg_close($interactorDbConn);
             }
