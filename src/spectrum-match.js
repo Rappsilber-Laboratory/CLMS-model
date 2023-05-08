@@ -346,6 +346,13 @@ export class SpectrumMatch {
         return (this.precursorCharge * this.calc_mz) - (this.precursorCharge * SpectrumMatch.protonMass); //this.calc_mass;
     }
 
+    missingPeaks() {
+        const errorMZ = this.expMZ() - this.calcMZ();
+        const errorM = errorMZ * this.precursorCharge;
+        //how many peaks assumed missing/miss-assigned
+        return Math.round(errorM / SpectrumMatch.C13_MASS_DIFFERENCE);
+    }
+
     massError() {
         return ((this.expMass() - this.calcMass()) / this.calcMass()) * 1000000;
     }
