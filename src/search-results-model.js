@@ -222,13 +222,13 @@ export class SearchResultsModel extends Backbone.Model {
 
             const crosslinks = this.get("crosslinks");
 
-            const rawMatches = json.rawMatches;
+            const rawMatches = json.matches;
             let minScore = undefined;
             let maxScore = undefined;
 
             // moved from modelUtils 05/08/19
             // Connect searches to proteins, and add the protein set as a property of a search in the clmsModel, MJG 17/05/17
-            const searchMap = this.getProteinSearchMap(json.peptides, json.rawMatches || json.identifications);
+            const searchMap = this.getProteinSearchMap(json.peptides, rawMatches);
             this.get("searches").forEach(function (value, key) {
                 value.participantIDSet = searchMap[key];
             });

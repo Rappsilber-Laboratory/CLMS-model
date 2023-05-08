@@ -529,6 +529,10 @@ export class SpectrumMatch {
         }
         return modCount1;
     }
+
+    get datasetId() {
+        return this.searchId;
+    }
 }
 
 SpectrumMatch.protonMass = 1.007276466879;

@@ -437,7 +437,7 @@ if (count($_GET) > 0) {
                 pg_free_result ($res);
 
                 //error_log (print_r ("2 ".memory_get_usage(), true));
-            $output["rawMatches"] = $matches; //TODO - rename to matches or PSM
+            $output["matches"] = $matches; //TODO - rename to matches or PSM
 
                 //error_log (print_r ($matches, true));
 
