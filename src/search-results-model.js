@@ -572,7 +572,7 @@ SearchResultsModel.attributeOptions =
                 });
             },
             id: "MassError",
-            label: "Match Mass Error",
+            label: "Match Mass Error (ppm)",
             decimalPlaces: 4,
             matchLevel: true
         },
