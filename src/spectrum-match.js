@@ -353,8 +353,14 @@ export class SpectrumMatch {
         return Math.round(errorM / SpectrumMatch.C13_MASS_DIFFERENCE);
     }
 
+
     massError() {
-        return ((this.expMass() - this.calcMass()) / this.calcMass()) * 1000000;
+        const massError = ((this.expMass() - this.calcMass()) / this.calcMass()) * 1000000;
+        // if (massError > SpectrumMatch.highestMassError) {
+        //     SpectrumMatch.highestMassError = massError;
+        // }
+        // console.log("mass error", this.expMass(), this.calcMass(), massError, this.id, SpectrumMatch.highestMassError);
+        return (massError > 10) ? 10 : massError;
     }
 
     ionTypes() {
@@ -427,3 +433,4 @@ export class SpectrumMatch {
 
 SpectrumMatch.protonMass = 1.007276466879;
 SpectrumMatch.C13_MASS_DIFFERENCE = 1.0033548;
+// SpectrumMatch.highestMassError = 0;

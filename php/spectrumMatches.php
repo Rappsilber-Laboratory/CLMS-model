@@ -349,7 +349,7 @@ if (count($_GET) > 0) {
     // Free resultset
     pg_free_result($res);
     pg_close($dbconn);
-    
+
     //interactors
     $interactors = [];
     if (isset($interactionConnection)) {
