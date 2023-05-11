@@ -11,7 +11,7 @@ if (count($_GET) > 0) {
         exit();
     }
 
-    include('../../connectionString.php');
+    include('../../xiviewConfig.php');
     $dbconn = pg_connect($connectionString) or die('Could not connect: ' . pg_last_error());
 
     $id = validateID_RandID($dbconn, $sid);
