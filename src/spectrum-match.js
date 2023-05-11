@@ -5,9 +5,14 @@ export class SpectrumMatch {
         this.containingModel = containingModel; //containing BB model
         this.identification = identification;
 
-        this.id = identification.id;
-        this.spectrumId = identification.sp_id;
+        this.spectrumId = identification.sp;
         this.searchId = identification.si.toString();
+        this.id = identification.id;
+        this.precursorMZ = +identification.pc_mz;
+        this.calc_mass = +identification.cm;
+        this._score = +identification.sc;
+
+
         this.resultSetId = identification.rs_id.toString();
         this.crosslinker_id = identification.cl;
 
@@ -26,18 +31,12 @@ export class SpectrumMatch {
             this.precursorCharge = undefined;
         }
 
-        this.precursorMZ = +identification.pc_mz;
-        this.calc_mass = +identification.cm;
-        this._score = +identification.sc;
-
-
-        // if (peptides) { //this is a bit tricky, see below*
-            this.matchedPeptides = [];
-            this.matchedPeptides[0] = peptides.get(this.searchId + "-" + identification.pi1);
-            // following will be inadequate for trimeric and higher order cross-links
-            if (!this.isNotCrosslinked()) {
-                this.matchedPeptides[1] = peptides.get(this.searchId + "-" + identification.pi2);
-            }
+        this.matchedPeptides = [];
+        this.matchedPeptides[0] = peptides.get(this.searchId + "_" + identification.pi1);
+        // following will be inadequate for trimeric and higher order cross-links
+        if (!this.isNotCrosslinked()) {
+            this.matchedPeptides[1] = peptides.get(this.searchId + "_" + identification.pi2);
+        }
         // } else { //*here - if its from a csv file use identificationes as the matchedPep array,
         //     //makes it easier to construct as parsing CSV
         //     this.matchedPeptides = identificationes;
@@ -47,13 +46,13 @@ export class SpectrumMatch {
         this.crosslinks = [];
         this.linkPos1 = +identification.s1;
         // if (identification.s2) {
-            this.linkPos2 = +identification.s2;
+        this.linkPos2 = +identification.s2;
         // }
 
         // the protein IDs and residue numers we eventually want to get:-
         let p1ID, p2ID, res1, res2;
 
-        if (this.isNotCrosslinked()) { //would have been -1 in DB but 1 was added to it during query
+        if (this.isNotCrosslinked()) { 
             //its a linear
             this.containingModel.set("linearsPresent", true);
             for (let i = 0; i < this.matchedPeptides[0].prt.length; i++) {
@@ -81,7 +80,7 @@ export class SpectrumMatch {
                     this.containingModel.set("ambiguousPresent", true);
                 }
 
-                //some files are not puting in duplicate protein ids in ambig links
+                //some files (must be csv) are not puting in duplicate protein ids in ambig links
                 //in this case use last one
                 if (i < this.matchedPeptides[0].prt.length) {
                     p1ID = this.matchedPeptides[0].prt[i];
@@ -143,7 +142,7 @@ export class SpectrumMatch {
     associateWithLink(proteins, crosslinks, p1ID, p2ID, res1, res2, //following params may be null :-
         pep1_start, pep1_length, pep2_start, pep2_length) {
 
-        // we don't want two different ID's, e.g. one thats "33-66" and one thats "66-33"
+        // we don't want two different ID's, e.g. one that's "33-66" and one that's "66-33"
         //following puts lower protein_ID first in link_ID
 
         //todo: this end swapping thing, its a possible source of confusion

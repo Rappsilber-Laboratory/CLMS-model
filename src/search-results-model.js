@@ -216,28 +216,29 @@ export class SearchResultsModel extends Backbone.Model {
                     SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
                     peptide = peptideArray[pep];
                     peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
-                    peptides.set(peptide.search_id + "-" + peptide.id, peptide);
+                    peptides.set(peptide.search_id + "_" + peptide.id, peptide);
                 }
             }
 
             const crosslinks = this.get("crosslinks");
 
-            const rawMatches = json.matches;
             let minScore = undefined;
             let maxScore = undefined;
 
             // moved from modelUtils 05/08/19
             // Connect searches to proteins, and add the protein set as a property of a search in the clmsModel, MJG 17/05/17
-            const searchMap = this.getProteinSearchMap(json.peptides, json.matches || json.identifications);
+            var searchMap = this.getProteinSearchMap(json.peptides, json.matches);
             this.get("searches").forEach(function (value, key) {
                 value.participantIDSet = searchMap[key];
             });
 
+            if (json.matches) {
+                var matches = this.get("matches");
 
-            if (rawMatches) {
-                const matches = this.get("matches");
-                for (let rawMatch of rawMatches) {
-                    const match = new SpectrumMatch(this, participants, crosslinks, peptides, rawMatch);
+                var l = json.matches.length;
+                for (var i = 0; i < l; i++) {
+                    var match = new SpectrumMatch(this, participants, crosslinks, peptides, json.matches[i]);
+
                     matches.push(match);
 
                     if (maxScore === undefined || match.score() > maxScore) {
@@ -247,6 +248,8 @@ export class SearchResultsModel extends Backbone.Model {
                     }
                 }
             }
+
+            console.log("score sets:", this.get("scoreSets"));
 
             this.set("minScore", minScore);
             this.set("maxScore", maxScore);
@@ -311,10 +314,8 @@ export class SearchResultsModel extends Backbone.Model {
 
         protObj.form = 0;
 
-        if (!protObj.name && protObj.accession){
+        if ((!protObj.name || protObj.name.trim() === '{"","protein description"}') && protObj.accession){
             protObj.name = protObj.accession;
-        } else if (protObj.name.indexOf("_") !== -1) { //take out organism abbreviation after underscore from names
-            protObj.name = protObj.name.substring(0, protObj.name.indexOf("_"));
         }
         protObj.getMeta = function (metaField) {
             if (arguments.length === 0) {
@@ -418,13 +419,12 @@ export class SearchResultsModel extends Backbone.Model {
         const decoys = prots.filter(function (p) {
             return p.is_decoy;
         });
-
         decoys.forEach(function (decoyProt) {
             prefixes.forEach(function (pre) {
                 const targetProtIDByName = nameMap.get(decoyProt.name.substring(pre.length));
                 if (decoyProt.accession) {
                     const targetProtIDByAccession = accessionMap.get(decoyProt.accession.substring(pre.length));
-                    if ( /*targetProtIDByName && */ targetProtIDByAccession) {
+                    if (targetProtIDByAccession) {
                         decoyProt.targetProteinID = targetProtIDByAccession; // mjg
                     }
                 } else if (targetProtIDByName) {
