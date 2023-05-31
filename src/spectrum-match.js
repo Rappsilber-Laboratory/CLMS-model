@@ -8,7 +8,7 @@ export class SpectrumMatch {
         this.spectrumId = identification.sp;
         this.searchId = identification.si.toString();
         this.id = this.searchId + "_" + identification.id;
-        this.precursorMZ = +identification.e_mz; // experimental MZ, accessor for this att is called expMZ()
+        this.precursorMZ = +identification.pc_mz; // experimental MZ, accessor for this att is called expMZ()
         this.calc_mz = +identification.c_mz;
         this._scores = identification.sc;
         var scoreSets = Object.keys(this._scores);
@@ -350,9 +350,9 @@ export class SpectrumMatch {
     }
 
     crosslinkerModMass() {
-        var clModMass = +this.matchedPeptides[0].clModMass;
+        var clModMass = +this.matchedPeptides[0].cl_modmass;
         if (this.matchedPeptides[1]) {
-            clModMass = clModMass + (+this.matchedPeptides[1].clModMass);
+            clModMass = clModMass + (+this.matchedPeptides[1].cl_modmass);
         }
         return clModMass;
     }
@@ -403,9 +403,9 @@ export class SpectrumMatch {
     }
 
     get scanNumber() {
-        if (this.spectrum) {
-            return +this.spectrum.sn;
-        }
+        // if (this.spectrum) {
+        return this.spectrumId;
+        // }
     }
 }
 
