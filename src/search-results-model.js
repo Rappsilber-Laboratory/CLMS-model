@@ -17,7 +17,7 @@ export class SearchResultsModel extends Backbone.Model {
             crosslinks: new Map(), //map
             scoreExtent: null,
             searches: new Map(),
-            decoysPresent: false,
+            decoysPresent: true,
             ambiguousPresent: false,
             manualValidatedPresent: false,
             unvalidatedPresent: false

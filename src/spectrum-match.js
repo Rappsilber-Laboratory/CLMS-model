@@ -279,7 +279,7 @@ export class SpectrumMatch {
     }
 
     runName() {
-        return this.containingModel.get("spectrumSources").get(this.src);
+        return this.identification.run;
     }
 
     peakListFileName() {
