@@ -29,7 +29,7 @@ export class SearchResultsModel extends Backbone.Model {
         if (json) {
             const self = this;
             this.set("sid", json.sid);
-
+            this.set("primaryScore", json.primary_score);
             //search meta data
             const searches = new Map();
             for (let propertyName in json.searches) {
