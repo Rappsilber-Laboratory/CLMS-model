@@ -1,6 +1,6 @@
 import d3 from "d3";
 
-export const loadSpectrum = function (match, randId) {
+export const prideLoadSpectrum = function (match, randId) {
     // if (match.spectrum && match.spectrum.pks) {
     const formatted_data = {};
 
@@ -49,7 +49,7 @@ export const loadSpectrum = function (match, randId) {
     formatted_data.precursorMZ = match.expMZ();
     formatted_data.requestID = match.id;
 
-    console.log("loadSpectrum match:" + match.id);
+    console.log("prideLoadSpectrum match:" + match.id);
 
     d3.json("./get_peaklist?id=" + match.spectrumId + "&sd_ref=" + match.identification.sd_ref + "&upload_id=" + match.searchId, function (error, json) {
         if (error) {

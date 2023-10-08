@@ -1,10 +1,10 @@
 import {Crosslink} from "./crosslink";
 
-export class SpectrumMatch {
+export class PrideSpectrumMatch {
     constructor(containingModel, participants, crosslinks, peptides, identification) {
         this.containingModel = containingModel; //containing BB model
         this.identification = identification;
-
+        this.primaryDataSetId = identification.si;
         this.spectrumId = identification.sp;
         this.searchId = identification.si.toString();
         this.id = this.searchId + "_" + identification.id;
@@ -319,22 +319,22 @@ export class SpectrumMatch {
 
 
     expMass() {
-        return this.precursorMZ * this.precursorCharge - (this.precursorCharge * SpectrumMatch.protonMass);
+        return this.precursorMZ * this.precursorCharge - (this.precursorCharge * PrideSpectrumMatch.protonMass);
     }
 
     calcMZ() {
-        return this.calc_mz;// (this.calc_mass + (this.precursorCharge * SpectrumMatch.protonMass)) / this.precursorCharge;
+        return this.calc_mz;// (this.calc_mass + (this.precursorCharge * PrideSpectrumMatch.protonMass)) / this.precursorCharge;
     }
 
     calcMass() {
-        return (this.precursorCharge * this.calc_mz) - (this.precursorCharge * SpectrumMatch.protonMass); //this.calc_mass;
+        return (this.precursorCharge * this.calc_mz) - (this.precursorCharge * PrideSpectrumMatch.protonMass); //this.calc_mass;
     }
 
     missingPeaks() {
         const errorMZ = this.expMZ() - this.calcMZ();
         const errorM = errorMZ * this.precursorCharge;
         //how many peaks assumed missing/miss-assigned
-        return Math.round(errorM / SpectrumMatch.C13_MASS_DIFFERENCE);
+        return Math.round(errorM / PrideSpectrumMatch.C13_MASS_DIFFERENCE);
     }
 
     massError() {
@@ -409,5 +409,5 @@ export class SpectrumMatch {
     }
 }
 
-SpectrumMatch.protonMass = 1.007276466879;
-SpectrumMatch.C13_MASS_DIFFERENCE = 1.0033548;
+PrideSpectrumMatch.protonMass = 1.007276466879;
+PrideSpectrumMatch.C13_MASS_DIFFERENCE = 1.0033548;

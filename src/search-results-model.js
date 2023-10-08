@@ -1,8 +1,8 @@
 import * as d3 from "d3";
 import * as Backbone from "backbone";
 
-import {SpectrumMatch} from "./spectrum-match";
-import {Peptide} from "./peptide";
+import {PrideSpectrumMatch} from "./pride-spectrum-match";
+//import {Peptide} from "./peptide";
 
 export class SearchResultsModel extends Backbone.Model {
 
@@ -20,6 +20,7 @@ export class SearchResultsModel extends Backbone.Model {
             searches: new Map(),
             decoysPresent: false,
             ambiguousPresent: false,
+            unvalidatedPresent: false,
             crosslinksPresent: false,
             linearsPresent: false, // TODO
             scoreSets: new Set(),
@@ -32,14 +33,18 @@ export class SearchResultsModel extends Backbone.Model {
         if (json) {
             const self = this;
             this.set("sid", json.sid);
-
-            //modifications
-            // short term hack - index mod names by accession
-            const modificationNames = new Map();
-            // for (let mod of json.modifications){
-            //     modificationNames.set(mod.accession, mod.mod_name);
-            // }
-            this.set("modificationNames", modificationNames);
+            if (this.get("serverFlavour") === "PRIDE") {
+                //modifications
+                // short term hack - index mod names by accession
+                const modificationNames = new Map();
+                // for (let mod of json.modifications){
+                //     modificationNames.set(mod.accession, mod.mod_name);
+                // }
+                this.set("modificationNames", modificationNames);
+                this.set("primaryScore", {score_name:"Match Score"});
+            } else if (this.get("serverFlavour") === "XI2") {
+                this.set("decoysPresent", true);
+            }
 
             //search meta data
             const searches = new Map();
@@ -187,88 +192,122 @@ export class SearchResultsModel extends Backbone.Model {
 
             //saved config should end up including filter settings not just xiNET layout
             this.set("xiNETLayout", json.xiNETLayout);
+            const spectrumSources = new Map();
+            if (this.get("serverFlavour") === "XI2") {
+                    //spectrum sources
+                    let specSource;
+                    for (let propertyName in json.spectrumSources) {
+                        specSource = json.spectrumSources[propertyName];
+                        spectrumSources.set(+specSource.id, specSource.name);
+                    }
 
-            //spectrum sources
-            var spectrumSources = new Map();
-            var specSource;
-            // var specCount = json.spectra.length;
-            // for (var sp = 0; sp < specCount; sp++) {
-            //     specSource = json.spectra[sp];
-            //     spectrumSources.set(specSource.up_id + "_" + specSource.id, specSource);
-            // }
+                    //peak list files
+                    const peakListFiles = new Map();
+                    let plFile;
+                    for (let propertyName in json.peakListFiles) {
+                        plFile = json.peakListFiles[propertyName];
+                        peakListFiles.set(+plFile.id, plFile.name);
+                    }
+                    this.set("peakListFiles", peakListFiles);
+            }
             this.set("spectrumSources", spectrumSources);
 
             const participants = this.get("participants");
 
-            if (!this.isAggregatedData()){
-                if (json.proteins) {
-                    for (let participant of json.proteins) {
-                        this.initProtein(participant, json);
+            if (this.get("serverFlavour") === "PRIDE") {
+                if (!this.isAggregatedData()) {
+                    if (json.proteins) {
+                        for (let participant of json.proteins) {
+                            this.initProtein(participant, json);
+                            participants.set(participant.id, participant);
+                        }
+                    }
+                    //peptides
+                    var peptides = new Map();
+                    if (json.peptides) {
+                        for (let peptide of json.peptides) {
+                            SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
+                            peptide.sequence = peptide.base_seq;//seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
+                            peptides.set(peptide.u_id + "_" + peptide.id, peptide); // concat upload_id and peptide.id
+                            for (var p = 0; p < peptide.prt.length; p++) {
+                                if (peptide.is_decoy[p]) {
+                                    const protein = participants.get(peptide.prt[p]);
+                                    if (!protein) {
+                                        console.error("Protein not found for peptide (not aggregated data)", peptide, peptide.prt[p]);
+                                    }
+                                    protein.is_decoy = true;
+                                    this.set("decoysPresent", true);
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    var tempParticipants = new Map();
+                    if (json.proteins) {
+                        for (let participant of json.proteins) {
+                            this.initProtein(participant, json);
+                            tempParticipants.set(participant.id, participant);
+                        }
+                    }
+                    //peptides
+                    var peptides = new Map();
+                    if (json.peptides) {
+                        for (let peptide of json.peptides) {
+                            SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
+                            peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
+                            peptides.set(peptide.u_id + "_" + peptide.id, peptide); // concat upload_id and peptide.id
+
+                            for (var p = 0; p < peptide.prt.length; p++) {
+                                const protein = tempParticipants.get(peptide.prt[p]);
+                                if (!protein) {
+                                    console.error("Protein not found for peptide (aggregated data)", peptide, peptide.prt[p]);
+                                }
+                                if (peptide.is_decoy[p]) {
+                                    const decoyId = "DECOY_" + protein.accession;
+                                    protein.is_decoy = true;
+                                    protein.id = decoyId;
+                                    // how to get prot acc after id has been changed?
+                                    peptide.prt[p] = decoyId;
+                                    this.set("decoysPresent", true);
+                                } else {
+                                    // fix ids for target in aggregated data
+                                    protein.id = protein.accession;
+                                    peptide.prt[p] = protein.accession;
+
+                                }
+
+                            }
+                        }
+                    }
+
+                    for (let participant of tempParticipants.values()) {
                         participants.set(participant.id, participant);
                     }
+
                 }
-                //peptides
-                var peptides = new Map();
-                if (json.peptides) {
-                    for (let peptide of json.peptides) {
-                        SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
-                        peptide.sequence = peptide.base_seq;//seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
-                        peptides.set(peptide.u_id + "_" + peptide.id, peptide); // concat upload_id and peptide.id
-                        for (var p = 0; p < peptide.prt.length; p++) {
-                            if (peptide.is_decoy[p]) {
-                                const protein = participants.get(peptide.prt[p]);
-                                if (!protein) {
-                                    console.error("Protein not found for peptide (not aggregated data)", peptide, peptide.prt[p]);
-                                }
-                                protein.is_decoy = true;
-                                this.set("decoysPresent", true);
-                            }
-                        }
-                    }
-                }
-            } else {
-                var tempParticipants = new Map();
+            } else if (this.get("serverFlavour") === "Xi2") {
+
                 if (json.proteins) {
-                    for (let participant of json.proteins) {
-                        this.initProtein(participant, json);
-                        tempParticipants.set(participant.id, participant);
+                    for (let protein of json.proteins) {
+                        this.initProtein(protein);
+                        participants.set(protein.id, protein);
                     }
                 }
+
                 //peptides
-                var peptides = new Map();
+                const peptides = new Map();
                 if (json.peptides) {
-                    for (let peptide of json.peptides) {
+                    const peptideArray = json.peptides;
+                    const pepCount = peptideArray.length;
+                    let peptide;
+                    for (let pep = 0; pep < pepCount; pep++) {
                         SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
+                        peptide = peptideArray[pep];
                         peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
-                        peptides.set(peptide.u_id + "_" + peptide.id, peptide); // concat upload_id and peptide.id
-
-                        for (var p = 0; p < peptide.prt.length; p++) {
-                            const protein = tempParticipants.get(peptide.prt[p]);
-                            if (!protein) {
-                                console.error("Protein not found for peptide (aggregated data)", peptide, peptide.prt[p]);
-                            }
-                            if (peptide.is_decoy[p]) {
-                                const decoyId = "DECOY_" + protein.accession;
-                                protein.is_decoy = true;
-                                protein.id = decoyId;
-                                // how to get prot acc after id has been changed?
-                                peptide.prt[p] = decoyId;
-                                this.set("decoysPresent", true);
-                            } else {
-                                // fix ids for target in aggregated data
-                                protein.id = protein.accession;
-                                peptide.prt[p] = protein.accession;
-
-                            }
-
-                        }
+                        peptides.set(peptide.search_id + "_" + peptide.id, peptide);
                     }
                 }
-
-                for (let participant of tempParticipants.values()) {
-                    participants.set(participant.id, participant);
-                }
-
+                
             }
 
             this.initDecoyLookup();
@@ -290,8 +329,11 @@ export class SearchResultsModel extends Backbone.Model {
 
                 var l = json.matches.length;
                 for (var i = 0; i < l; i++) {
-                    var match = new SpectrumMatch(this, participants, crosslinks, peptides, json.matches[i]);
-
+                    if (this.get("serverFlavour") === "PRIDE") {
+                        var match = new PrideSpectrumMatch(this, participants, crosslinks, peptides, json.matches[i]);
+                    } else if (this.get("serverFlavour") === "Xi2") {
+                        var match = new Xi2SpectrumMatch(this, participants, crosslinks, peptides, json.matches[i]);
+                    }
                     matches.push(match);
 
                     if (maxScore === undefined || match.score() > maxScore) {
@@ -317,7 +359,7 @@ export class SearchResultsModel extends Backbone.Model {
                 participant.uniprot = json.interactors ? json.interactors[participant.accession.split("-")[0]] : null;
             }
 
-            window.vent.trigger("uniprotDataParsed", self); // todo - get rid
+            window.vent.trigger("uniprotDataParsed", self);
         }
 
     }
@@ -334,10 +376,10 @@ export class SearchResultsModel extends Backbone.Model {
             peptideIDs.forEach(function (pepID) {
                 if (pepID) {
                     const prots = pepMap.get(pepID).prt;
-                    let searchToProts = searchMap[rawMatch.si];
+                    let searchToProts = searchMap[rawMatch.primaryDataSetId];
                     if (!searchToProts) {
                         const newSet = d3.set();
-                        searchMap[rawMatch.si] = newSet;
+                        searchMap[rawMatch.primaryDataSetId] = newSet;
                         searchToProts = newSet;
                     }
                     prots.forEach(function (prot) {
@@ -350,22 +392,20 @@ export class SearchResultsModel extends Backbone.Model {
     }
 
     //adds some attributes we want to protein object
-    initProtein(protObj, json) {
+    initProtein(protObj) {
         if (!protObj.crosslinks) {
             protObj.crosslinks = [];
         }
-        protObj.is_decoy = false;
-        // var accCheck = protObj.accession.match(SearchResultsModel.commonRegexes.uniprotAccession);
-        // if (protObj.seq_mods) {
-        //     SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
-        //     protObj.sequence = protObj.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
-        // }
-        // else if (accCheck != null && json.interactors[protObj.accession]) {
-        //     protObj.sequence = json.interactors[protObj.accession].sequence;
-        // }
-        // else {
-        //     protObj.sequence = "";
-        // }
+        // check serverFlavour
+        if (this.get("serverFlavour") === "PRIDE") {
+            protObj.is_decoy = false;
+        }
+        else if (this.get("serverFlavour") === "Xi2") {
+            if (protObj.seq_mods) {
+                SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
+                protObj.sequence = protObj.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
+            }
+        }
         protObj.size = protObj.sequence.length;
 
         protObj.form = 0;
