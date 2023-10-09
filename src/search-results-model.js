@@ -2,6 +2,7 @@ import * as d3 from "d3";
 import * as Backbone from "backbone";
 
 import {PrideSpectrumMatch} from "./pride-spectrum-match";
+import {Xi2SpectrumMatch} from "./xi2-spectrum-match";
 //import {Peptide} from "./peptide";
 
 export class SearchResultsModel extends Backbone.Model {
@@ -44,6 +45,7 @@ export class SearchResultsModel extends Backbone.Model {
                 this.set("primaryScore", {score_name:"Match Score"});
             } else if (this.get("serverFlavour") === "XI2") {
                 this.set("decoysPresent", true);
+                this.set("primaryScore", json.primary_score);
             }
 
             //search meta data
@@ -194,26 +196,26 @@ export class SearchResultsModel extends Backbone.Model {
             this.set("xiNETLayout", json.xiNETLayout);
             const spectrumSources = new Map();
             if (this.get("serverFlavour") === "XI2") {
-                    //spectrum sources
-                    let specSource;
-                    for (let propertyName in json.spectrumSources) {
-                        specSource = json.spectrumSources[propertyName];
-                        spectrumSources.set(+specSource.id, specSource.name);
-                    }
+                //spectrum sources
+                let specSource;
+                for (let propertyName in json.spectrumSources) {
+                    specSource = json.spectrumSources[propertyName];
+                    spectrumSources.set(+specSource.id, specSource.name);
+                }
 
-                    //peak list files
-                    const peakListFiles = new Map();
-                    let plFile;
-                    for (let propertyName in json.peakListFiles) {
-                        plFile = json.peakListFiles[propertyName];
-                        peakListFiles.set(+plFile.id, plFile.name);
-                    }
-                    this.set("peakListFiles", peakListFiles);
+                //peak list files
+                const peakListFiles = new Map();
+                let plFile;
+                for (let propertyName in json.peakListFiles) {
+                    plFile = json.peakListFiles[propertyName];
+                    peakListFiles.set(+plFile.id, plFile.name);
+                }
+                this.set("peakListFiles", peakListFiles);
             }
             this.set("spectrumSources", spectrumSources);
 
             const participants = this.get("participants");
-
+            const peptides = new Map();
             if (this.get("serverFlavour") === "PRIDE") {
                 if (!this.isAggregatedData()) {
                     if (json.proteins) {
@@ -223,7 +225,6 @@ export class SearchResultsModel extends Backbone.Model {
                         }
                     }
                     //peptides
-                    var peptides = new Map();
                     if (json.peptides) {
                         for (let peptide of json.peptides) {
                             SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
@@ -250,7 +251,6 @@ export class SearchResultsModel extends Backbone.Model {
                         }
                     }
                     //peptides
-                    var peptides = new Map();
                     if (json.peptides) {
                         for (let peptide of json.peptides) {
                             SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
@@ -285,7 +285,7 @@ export class SearchResultsModel extends Backbone.Model {
                     }
 
                 }
-            } else if (this.get("serverFlavour") === "Xi2") {
+            } else if (this.get("serverFlavour") === "XI2") {
 
                 if (json.proteins) {
                     for (let protein of json.proteins) {
@@ -295,7 +295,6 @@ export class SearchResultsModel extends Backbone.Model {
                 }
 
                 //peptides
-                const peptides = new Map();
                 if (json.peptides) {
                     const peptideArray = json.peptides;
                     const pepCount = peptideArray.length;
@@ -329,10 +328,11 @@ export class SearchResultsModel extends Backbone.Model {
 
                 var l = json.matches.length;
                 for (var i = 0; i < l; i++) {
+                    let match;
                     if (this.get("serverFlavour") === "PRIDE") {
-                        var match = new PrideSpectrumMatch(this, participants, crosslinks, peptides, json.matches[i]);
-                    } else if (this.get("serverFlavour") === "Xi2") {
-                        var match = new Xi2SpectrumMatch(this, participants, crosslinks, peptides, json.matches[i]);
+                        match = new PrideSpectrumMatch(this, participants, crosslinks, peptides, json.matches[i]);
+                    } else if (this.get("serverFlavour") === "XI2") {
+                        match = new Xi2SpectrumMatch(this, participants, crosslinks, peptides, json.matches[i]);
                     }
                     matches.push(match);
 
@@ -400,12 +400,8 @@ export class SearchResultsModel extends Backbone.Model {
         if (this.get("serverFlavour") === "PRIDE") {
             protObj.is_decoy = false;
         }
-        else if (this.get("serverFlavour") === "Xi2") {
-            if (protObj.seq_mods) {
-                SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
-                protObj.sequence = protObj.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
-            }
-        }
+        // else if (this.get("serverFlavour") === "XI2") {
+        // }
         protObj.size = protObj.sequence.length;
 
         protObj.form = 0;
