@@ -3,6 +3,7 @@ import * as Backbone from "backbone";
 
 import {PrideSpectrumMatch} from "./pride-spectrum-match";
 import {Xi2SpectrumMatch} from "./xi2-spectrum-match";
+import {OldSpectrumMatch} from "./old-spectrum-match";
 //import {Peptide} from "./peptide";
 
 export class SearchResultsModel extends Backbone.Model {
@@ -46,6 +47,20 @@ export class SearchResultsModel extends Backbone.Model {
             } else if (this.get("serverFlavour") === "XI2") {
                 this.set("decoysPresent", true);
                 this.set("primaryScore", json.primary_score);
+            } else if (this.get("serverFlavour") === "XIVIEW.ORG") {
+                this.set("primaryScore", {score_name:"Match Score"});
+            //modifications
+            var modifications = [];
+            var modCount = json.modifications.length;
+            for (var m = 0; m < modCount; m++) {
+                var mod = json.modifications[m];
+                modifications.push({
+                    aminoAcids: mod.residues.split(""),
+                    id: mod.mod_name,
+                    mass: mod.mass
+                });
+            }
+            this.set("modifications", modifications);
             }
 
             //search meta data
@@ -211,6 +226,13 @@ export class SearchResultsModel extends Backbone.Model {
                     peakListFiles.set(+plFile.id, plFile.name);
                 }
                 this.set("peakListFiles", peakListFiles);
+            } else if (this.get("serverFlavour") === "XIVIEW.ORG") {
+                //spectrum sources
+                let specSource;
+                for (let propertyName in json.spectrumSources) {
+                    specSource = json.spectrumSources[propertyName];
+                    spectrumSources.set(specSource.up_id + "_" + specSource.id, specSource);
+                }
             }
             this.set("spectrumSources", spectrumSources);
 
@@ -307,6 +329,49 @@ export class SearchResultsModel extends Backbone.Model {
                     }
                 }
                 
+            } else if (this.get("serverFlavour") === "XIVIEW.ORG") {
+                var tempParticipants = new Map();
+                
+                if (json.proteins) {
+                    for (let participant of json.proteins) {
+                        this.initProtein(participant, json);
+                        tempParticipants.set(participant.id, participant);
+                    }
+                }
+                //peptides
+                if (json.peptides) {
+                    for (let peptide of json.peptides) {
+
+                        SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
+                        peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
+                        peptides.set(peptide.u_id + "_" + peptide.id, peptide); // concat upload_id and peptide.id
+
+                        for (var p = 0; p < peptide.prt.length; p++) {
+                            const protein = tempParticipants.get(peptide.prt[p]);
+                            if (!protein) {
+                                console.error("Protein not found for peptide (aggregated data)", peptide, peptide.prt[p]);
+                            }
+                            if (peptide.is_decoy[p]) {
+                                const decoyId = "DECOY_" + protein.accession;
+                                protein.is_decoy = true;
+                                protein.id = decoyId;
+                                // how to get prot acc after id has been changed?
+                                peptide.prt[p] = decoyId;
+                                this.set("decoysPresent", true);
+                            } else {
+                                // fix ids for target in aggregated data
+                                protein.id = protein.accession;
+                                peptide.prt[p] = protein.accession;
+
+                            }
+
+                        }
+                    }
+                }
+
+                for (let participant of tempParticipants.values()) {
+                    participants.set(participant.id, participant);
+                }
             }
 
             this.initDecoyLookup();
@@ -333,6 +398,8 @@ export class SearchResultsModel extends Backbone.Model {
                         match = new PrideSpectrumMatch(this, participants, crosslinks, peptides, json.matches[i]);
                     } else if (this.get("serverFlavour") === "XI2") {
                         match = new Xi2SpectrumMatch(this, participants, crosslinks, peptides, json.matches[i]);
+                    } else if (this.get("serverFlavour") === "XIVIEW.ORG") {
+                        match = new OldSpectrumMatch(this, participants, crosslinks, peptides, json.matches[i]);
                     }
                     matches.push(match);
 
@@ -392,7 +459,7 @@ export class SearchResultsModel extends Backbone.Model {
     }
 
     //adds some attributes we want to protein object
-    initProtein(protObj) {
+    initProtein(protObj, json) {
         if (!protObj.crosslinks) {
             protObj.crosslinks = [];
         }
@@ -400,8 +467,18 @@ export class SearchResultsModel extends Backbone.Model {
         if (this.get("serverFlavour") === "PRIDE") {
             protObj.is_decoy = false;
         }
-        // else if (this.get("serverFlavour") === "XI2") {
-        // }
+        else if (this.get("serverFlavour") === "XIVIEW.ORG") {
+            protObj.is_decoy = false;
+            var accCheck = protObj.accession.match(SearchResultsModel.commonRegexes.uniprotAccession);
+            if (protObj.seq_mods) {
+                SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
+                protObj.sequence = protObj.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
+            } else if (accCheck != null && json.interactors[protObj.accession]) {
+                protObj.sequence = json.interactors[protObj.accession].sequence;
+            } else {
+                protObj.sequence = "";
+            }
+        }
         protObj.size = protObj.sequence.length;
 
         protObj.form = 0;
