@@ -228,9 +228,10 @@ export class SearchResultsModel extends Backbone.Model {
                 this.set("peakListFiles", peakListFiles);
             } else if (this.get("serverFlavour") === "XIVIEW.ORG") {
                 //spectrum sources
-                let specSource;
-                for (let propertyName in json.spectrumSources) {
-                    specSource = json.spectrumSources[propertyName];
+                var specSource;
+                var specCount = json.spectra.length;
+                for (var sp = 0; sp < specCount; sp++) {
+                    specSource = json.spectra[sp];
                     spectrumSources.set(specSource.up_id + "_" + specSource.id, specSource);
                 }
             }
