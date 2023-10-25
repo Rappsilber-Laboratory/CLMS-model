@@ -25,7 +25,7 @@ export const oldLoadSpectrum = function (match, randId) {
 
         console.log("loadSpectrum match:" + match.id);
 
-        d3.json("../CLMS-model/php/peakList.php?upload=" + match.searchId + "-" + randId + "&spid=" + match.spectrumId, function (error, json) {
+        d3.json("./php/peakList.php?upload=" + match.searchId + "-" + randId + "&spid=" + match.spectrumId, function (error, json) {
             if (error) {
                 console.log("error getting peak list", json);
             } else {
