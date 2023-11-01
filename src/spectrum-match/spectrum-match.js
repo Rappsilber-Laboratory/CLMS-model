@@ -1,6 +1,6 @@
 import {Crosslink} from "../crosslink";
 
-class SpectrumMatch {
+export class SpectrumMatch {
 
     constructor() {
 

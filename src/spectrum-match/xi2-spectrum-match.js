@@ -1,7 +1,9 @@
 import {Crosslink} from "../crosslink";
+import {SpectrumMatch} from "./spectrum-match";
 
-export class Xi2SpectrumMatch {
+export class Xi2SpectrumMatch extends SpectrumMatch {
     constructor(containingModel, participants, crosslinks, peptides, identification) {
+        super();
         this.containingModel = containingModel; //containing BB model
         this.identification = identification;
         this.primaryDataSetId = identification.rs_id;
@@ -392,6 +394,19 @@ export class Xi2SpectrumMatch {
 
     get passThreshold() {
         return true;
+    }
+
+    get pepSeq1_mods() {
+        return this.matchedPeptides[0].seq_mods;
+    }
+
+    get pepSeq2_mods() {
+        if (!this.matchedPeptides[1]) return undefined;
+        return this.matchedPeptides[1].seq_mods;
+    }
+
+    get psmId() {
+        return this.identification.id;
     }
 
     get datasetId() {
