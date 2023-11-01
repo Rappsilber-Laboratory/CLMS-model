@@ -1,4 +1,4 @@
-import {Crosslink} from "./crosslink";
+import {Crosslink} from "../crosslink";
 
 export class OldSpectrumMatch {
     constructor(containingModel, participants, crosslinks, peptides, identification) {

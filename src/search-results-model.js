@@ -1,9 +1,9 @@
 import * as d3 from "d3";
 import * as Backbone from "backbone";
 
-import {PrideSpectrumMatch} from "./pride-spectrum-match";
-import {Xi2SpectrumMatch} from "./xi2-spectrum-match";
-import {OldSpectrumMatch} from "./old-spectrum-match";
+import {PrideSpectrumMatch} from "./spectrum-match/pride-spectrum-match";
+import {Xi2SpectrumMatch} from "./spectrum-match/xi2-spectrum-match";
+import {OldSpectrumMatch} from "./spectrum-match/old-spectrum-match";
 //import {Peptide} from "./peptide";
 
 export class SearchResultsModel extends Backbone.Model {
