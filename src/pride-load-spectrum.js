@@ -10,8 +10,8 @@ export const prideLoadSpectrum = function (match, randId) {
         const pepLen = peptide.base_seq.length;
         for (let i = 0; i < pepLen; i++) {
             seqMods += peptide.base_seq[i];
-            if (peptide.mod_pos.indexOf(i) !== -1){
-                const modIndex = peptide.mod_pos.indexOf(i);
+            if (peptide.mod_pos.indexOf(i + 1) !== -1){
+                const modIndex = peptide.mod_pos.indexOf(i + 1);
                 const modName = "(" + peptide.mod_masses[modIndex] + ")";
                 seqMods += modName;
                 if (!modMap.has(modName)) {
@@ -22,8 +22,6 @@ export const prideLoadSpectrum = function (match, randId) {
 
         return seqMods;
     }
-
-    console.log(createModSequence(match.matchedPeptides[0]));
 
     formatted_data.sequence1 = createModSequence(match.matchedPeptides[0]);
     formatted_data.linkPos1 = match.linkPos1 - 1;
