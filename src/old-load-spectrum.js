@@ -41,7 +41,7 @@ export const oldLoadSpectrum = function (match, randId) {
 
                 formatted_data.peakList = peakArray; //JSON.parse(text).map(function(p){ return [p.mz, p.intensity]; });
                 console.log(formatted_data);
-                window.xiSPEC.setData(formatted_data);
+                window.compositeModelInst.get("xispec_wrapper").setData(formatted_data);
             }
         });
     }
