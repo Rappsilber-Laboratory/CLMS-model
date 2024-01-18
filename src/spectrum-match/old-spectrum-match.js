@@ -6,7 +6,7 @@ export class OldSpectrumMatch {
         this.containingModel = containingModel; //containing BB model
         this.spectrumId = +identification.sp;
         this.searchId = identification.si.toString();
-        this.primaryDataSetId = this.si;
+        this.primaryDataSetId = identification.si;
         this.precursor_intensity = null;
         this.id = this.searchId + "_" + identification.id;
         this.precursorMZ = +identification.e_mz; // experimental MZ, accessor for this att is called expMZ()
