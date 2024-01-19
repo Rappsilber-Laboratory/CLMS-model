@@ -6,7 +6,6 @@ export class PrideSpectrumMatch extends SpectrumMatch{
         super();
         this.containingModel = containingModel; //containing BB model
         this.identification = identification;
-        this.primaryDataSetId = identification.si;
         this.precursor_intensity = null;
         this.spectrumId = identification.sp;
         this.searchId = identification.si.toString();

@@ -49,18 +49,18 @@ export class SearchResultsModel extends Backbone.Model {
                 this.set("primaryScore", json.primary_score);
             } else if (this.get("serverFlavour") === "XIVIEW.ORG") {
                 this.set("primaryScore", {score_name:"Match Score"});
-            //modifications
-            var modifications = [];
-            var modCount = json.modifications.length;
-            for (var m = 0; m < modCount; m++) {
-                var mod = json.modifications[m];
-                modifications.push({
-                    aminoAcids: mod.residues.split(""),
-                    id: mod.mod_name,
-                    mass: mod.mass
-                });
-            }
-            this.set("modifications", modifications);
+                //modifications
+                var modifications = [];
+                var modCount = json.modifications.length;
+                for (var m = 0; m < modCount; m++) {
+                    var mod = json.modifications[m];
+                    modifications.push({
+                        aminoAcids: mod.residues.split(""),
+                        id: mod.mod_name,
+                        mass: mod.mass
+                    });
+                }
+                this.set("modifications", modifications);
             }
 
             //search meta data
@@ -444,10 +444,10 @@ export class SearchResultsModel extends Backbone.Model {
             peptideIDs.forEach(function (pepID) {
                 if (pepID) {
                     const prots = pepMap.get(pepID).prt;
-                    let searchToProts = searchMap[rawMatch.primaryDataSetId];
+                    let searchToProts = searchMap[rawMatch.datasetId];
                     if (!searchToProts) {
                         const newSet = d3.set();
-                        searchMap[rawMatch.primaryDataSetId] = newSet;
+                        searchMap[rawMatch.datasetId] = newSet;
                         searchToProts = newSet;
                     }
                     prots.forEach(function (prot) {

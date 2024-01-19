@@ -6,7 +6,6 @@ export class Xi2SpectrumMatch extends SpectrumMatch {
         super();
         this.containingModel = containingModel; //containing BB model
         this.identification = identification;
-        this.primaryDataSetId = identification.rs_id;
         this.spectrumId = identification.sp;
         this.searchId = identification.si.toString();
         this.id = identification.id;
