@@ -34,10 +34,7 @@ export class OldSpectrumMatch extends SpectrumMatch{
         }
 
         this.spectrum = this.containingModel.get("spectrumSources").get(this.searchId + "_" + this.spectrumId);
-        if (this.spectrum) {
-            this.scanNumber = +this.spectrum.sn;
-        }
-        
+
         this.precursorCharge = +identification.pc_c;
         // if (this.precursorCharge == -1) { //dodgy?
         //     this.precursorCharge = undefined;
@@ -309,14 +306,17 @@ export class OldSpectrumMatch extends SpectrumMatch{
     }
 
     get datasetId() {
+        console.log("datasetId", this.searchId);
         return this.searchId;
     }
 
-    // get scanNumber() {
-    //     if (this.spectrum) {
-    //         this.scanNumber = +this.spectrum.sn;
-    //     }
-    // }
+    get scanNumber() {
+        if (this.spectrum) {
+            return +this.spectrum.sn;
+        } else {
+            return undefined;
+        }
+    }
 }
 
 OldSpectrumMatch.protonMass = 1.007276466879;
