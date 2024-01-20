@@ -439,15 +439,24 @@ export class SearchResultsModel extends Backbone.Model {
         });
         const searchMap = {};
         rawMatchArray = rawMatchArray || [];
+        const self = this;
         rawMatchArray.forEach(function (rawMatch) {
             const peptideIDs = rawMatch.pi ? rawMatch.pi : [rawMatch.pi1, rawMatch.pi2];
             peptideIDs.forEach(function (pepID) {
                 if (pepID) {
                     const prots = pepMap.get(pepID).prt;
-                    let searchToProts = searchMap[rawMatch.datasetId];
+                    let searchId;
+                    // check server flavour -- problems ere to do with xi2
+                    if (self.get("serverFlavour") === "XI2") {
+                        searchId = rawMatch.datasetId;
+                    }
+                    else {
+                        searchId = rawMatch.si;
+                    }
+                    let searchToProts = searchMap[searchId];
                     if (!searchToProts) {
                         const newSet = d3.set();
-                        searchMap[rawMatch.datasetId] = newSet;
+                        searchMap[searchId] = newSet;
                         searchToProts = newSet;
                     }
                     prots.forEach(function (prot) {
