@@ -138,3 +138,7 @@ export class SpectrumMatch {
     }
 
 }
+
+
+SpectrumMatch.protonMass = 1.007276466879;
+SpectrumMatch.C13_MASS_DIFFERENCE = 1.0033548;

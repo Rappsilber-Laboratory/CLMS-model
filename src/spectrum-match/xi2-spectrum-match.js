@@ -6,31 +6,31 @@ export class Xi2SpectrumMatch extends SpectrumMatch {
         super();
         this.containingModel = containingModel; //containing BB model
         this.identification = identification;
-        this.spectrumId = identification.sp;
-        this.searchId = identification.si.toString();
-        this.id = identification.id;
-        this.precursorMZ = +identification.pc_mz;
-        this.calc_mass = +identification.cm;
-        this._score = +identification.sc;
-
-
-        this.resultSetId = identification.rs_id.toString();
-        this.crosslinker_id = identification.cl;
-
-        // this.scanNumber = null;//+identificationes[0].sn;
-        this.scanIndex = null;//+identificationes[0].sc_i;
-        this.precursor_intensity = +identification.pc_i;
-        this.elution_time_start = +identification.rt;
-        this.elution_time_end = null;//+identificationes[0].e_e;
-
-        this.src = null;//+identificationes[0].src; //for looking up run name
-        this.plf = null;//+identificationes[0].plf; //for looking up peak list file name
-        //run name may have come from csv file
-
-        this.precursorCharge = +identification.pc_c;
-        if (this.precursorCharge === -1) {
-            this.precursorCharge = undefined;
-        }
+        // this.spectrumId = identification.sp;
+        // this.searchId = identification.si.toString();
+        // this.id = identification.id;
+        // this.precursorMZ = +identification.pc_mz;
+        // this.calc_mass = +identification.cm;
+        // this._score = +identification.sc;
+        //
+        //
+        // this.resultSetId = identification.rs_id.toString();
+        // this.crosslinker_id = identification.cl;
+        //
+        // // this.scanNumber = null;//+identificationes[0].sn;
+        // this.scanIndex = null;//+identificationes[0].sc_i;
+        // this.precursor_intensity = +identification.pc_i;
+        // this.elution_time_start = +identification.rt;
+        // this.elution_time_end = null;//+identificationes[0].e_e;
+        //
+        // this.src = null;//+identificationes[0].src; //for looking up run name
+        // this.plf = null;//+identificationes[0].plf; //for looking up peak list file name
+        // //run name may have come from csv file
+        //
+        // this.precursorCharge = +identification.pc_c;
+        // if (this.precursorCharge === -1) {
+        //     this.precursorCharge = undefined;
+        // }
 
         this.matchedPeptides = [];
         this.matchedPeptides[0] = peptides.get(this.searchId + "_" + identification.pi1);
@@ -45,12 +45,12 @@ export class Xi2SpectrumMatch extends SpectrumMatch {
 
         //if the match is ambiguous it will relate to many crosslinks
         this.crosslinks = [];
-        this.linkPos1 = +identification.s1;
-        // if (identification.s2) {
-        this.linkPos2 = +identification.s2;
-        // }
+        // this.linkPos1 = +identification.s1;
+        // // if (identification.s2) {
+        // this.linkPos2 = +identification.s2;
+        // // }
 
-        // the protein IDs and residue numers we eventually want to get:-
+        // the protein IDs and residue numbers we eventually want to get:-
         let p1ID, p2ID, res1, res2;
 
         if (this.isNotCrosslinked()) { 
@@ -165,11 +165,11 @@ export class Xi2SpectrumMatch extends SpectrumMatch {
     }
 
     expMass() {
-        return this.precursorMZ * this.precursorCharge - (this.precursorCharge * Xi2SpectrumMatch.protonMass);
+        return this.precursorMZ * this.precursorCharge - (this.precursorCharge * SpectrumMatch.protonMass);
     }
 
     calcMZ() {
-        return (this.calc_mass + (this.precursorCharge * Xi2SpectrumMatch.protonMass)) / this.precursorCharge;
+        return (this.calc_mass + (this.precursorCharge * SpectrumMatch.protonMass)) / this.precursorCharge;
     }
 
     calcMass() {
@@ -180,7 +180,7 @@ export class Xi2SpectrumMatch extends SpectrumMatch {
         const errorMZ = this.expMZ() - this.calcMZ();
         const errorM = errorMZ * this.precursorCharge;
         //how many peaks assumed missing/miss-assigned
-        return Math.round(errorM / Xi2SpectrumMatch.C13_MASS_DIFFERENCE);
+        return Math.round(errorM / SpectrumMatch.C13_MASS_DIFFERENCE);
     }
 
     massError() {
@@ -189,7 +189,7 @@ export class Xi2SpectrumMatch extends SpectrumMatch {
 
         // new - change needed due to some other change to do with missing peaks
         // what is the error in m/z
-        const assumedMZ = this.expMZ() - this.missingPeaks() * Xi2SpectrumMatch.C13_MASS_DIFFERENCE / this.precursorCharge;
+        const assumedMZ = this.expMZ() - this.missingPeaks() * SpectrumMatch.C13_MASS_DIFFERENCE / this.precursorCharge;
         const errorMZ = assumedMZ - this.calcMZ();
         return errorMZ / this.calcMZ() * 1000000;
     }
@@ -253,7 +253,7 @@ export class Xi2SpectrumMatch extends SpectrumMatch {
     }
 
     score() {
-        return this._score;
+        return +this.identification.sc;
     }
 
     experimentalMissedCleavageCount() {
@@ -366,31 +366,6 @@ export class Xi2SpectrumMatch extends SpectrumMatch {
         return modCount1;
     }
 
-//     this.id = identification.id;
-//     this.spectrumId = identification.sp_id;
-//     this.searchId = identification.si.toString();
-//     this.resultSetId = identification.rsi.toString();
-//     this.crosslinker_id = identification.cl;
-//
-//     // this.scanNumber = null;//+identificationes[0].sn;
-//     this.scanIndex = null;//+identificationes[0].sc_i;
-//     this.precursor_intensity = null;//+identificationes[0].pc_i;
-//     this.elution_time_start = null;//+identificationes[0].e_s;
-//     this.elution_time_end = null;//+identificationes[0].e_e;
-//
-//     this.src = null;//+identificationes[0].src; //for looking up run name
-//     this.plf = null;//+identificationes[0].plf; //for looking up peak list file name
-//     //run name may have come from csv file
-//
-//     this.precursorCharge = +identification.pc_c;
-//     if (this.precursorCharge === -1) {
-//     this.precursorCharge = undefined;
-// }
-//
-// this.precursorMZ = +identification.pc_mz;
-// this.calc_mass = +identification.cm;
-// this._score = +identification.sc;
-
     get passThreshold() {
         return true;
     }
@@ -415,7 +390,66 @@ export class Xi2SpectrumMatch extends SpectrumMatch {
     get scanNumber() {
         return this.identification.sn;
     }
+
+    get spectrumId() {
+        return this.identification.sp_id;
+    }
+
+    get searchId() {
+        return this.identification.si.toString();
+    }
+
+    get resultSetId() {
+        return this.identification.rs_id.toString();
+    }
+
+    get crosslinker_id() {
+        return this.identification.cl;
+    }
+
+    get scanIndex() {
+        return null;
+    }
+
+    get precursor_intensity() {
+        return null;
+    }
+
+    get elution_time_start() {
+        return null;
+    }
+
+    get elution_time_end() {
+        return null;
+    }
+
+    get src() {
+        return null;
+    }
+
+    get plf() {
+        return null;
+    }
+
+    get precursorCharge() {
+        const c = this.identification.pc_c;
+        return c === -1 ? undefined : c;
+    }
+
+    get precursorMZ() {
+        return +this.identification.pc_mz;
+    }
+
+    get calc_mass() {
+        return +this.identification.cm;
+    }
+
+    get linkPos1() {
+        return +this.identification.s1;
+    }
+
+    get linkPos2() {
+        return +this.identification.s2;
+    }
 }
 
-Xi2SpectrumMatch.protonMass = 1.007276466879;
-Xi2SpectrumMatch.C13_MASS_DIFFERENCE = 1.0033548;
