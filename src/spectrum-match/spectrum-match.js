@@ -129,7 +129,7 @@ export class SpectrumMatch {
     }
 
     isDecoy() {
-        if (this.is_decoy) {
+        if (this.is_decoy) { //todo - looks bad
             return this.is_decoy;
         } else {
             //its from csv not database, for simplicity lets just look at first crosslink //todo - look at again

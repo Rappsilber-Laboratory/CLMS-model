@@ -6,40 +6,40 @@ export class PrideSpectrumMatch extends SpectrumMatch{
         super();
         this.containingModel = containingModel; //containing BB model
         this.identification = identification;
-        this.precursor_intensity = null;
-        this.spectrumId = identification.sp;
-        this.searchId = identification.si.toString();
-        this.id = this.searchId + "_" + identification.id;
-        this.precursorMZ = +identification.pc_mz; // experimental MZ, accessor for this att is called expMZ()
-        this.calc_mz = +identification.c_mz;
-        this._scores = identification.sc;
+        // this.precursor_intensity = null;
+        // this.spectrumId = identification.sp;
+        // this.searchId = identification.si.toString();
+        // this.id = this.searchId + "_" + identification.id;
+        // this.precursorMZ = +identification.pc_mz; // experimental MZ, accessor for this att is called expMZ()
+        // this.calc_mz = +identification.c_mz;
+        // this._scores = identification.sc;
         var scoreSets = Object.keys(this._scores);
         var scoreSetCount = scoreSets.length;
         for (var s = 0; s < scoreSetCount; s++) {
             var scoreSet = scoreSets[s];
             this.containingModel.get("scoreSets").add(scoreSet);
         }
-
-        this.passThreshold = !!identification.pass;
-        if (identification.ions) {
-            var ionTypes = identification.ions.split(";");
-            var ionTypeCount = ionTypes.length;
-            var ions = [];
-            for (var it = 0; it < ionTypeCount; it++) {
-                var ionType = ionTypes[it];
-                ions.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
-            }
-            this.ions = ions;
-        } else {
-            this.ions = [{type:"bIon"}, {type:"yIon"}];
-        }
-
-        this.spectrum = this.containingModel.get("spectrumSources").get(this.searchId + "_" + this.spectrumId);
-
-        this.precursorCharge = +identification.pc_c;
-        if (this.precursorCharge === -1) {
-            this.precursorCharge = undefined;
-        }
+        //
+        // this.passThreshold = !!identification.pass;
+        // if (identification.ions) {
+        //     var ionTypes = identification.ions.split(";");
+        //     var ionTypeCount = ionTypes.length;
+        //     var ions = [];
+        //     for (var it = 0; it < ionTypeCount; it++) {
+        //         var ionType = ionTypes[it];
+        //         ions.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
+        //     }
+        //     this.ions = ions;
+        // } else {
+        //     this.ions = [{type:"bIon"}, {type:"yIon"}];
+        // }
+        //
+        // this.spectrum = this.containingModel.get("spectrumSources").get(this.searchId + "_" + this.spectrumId);
+        //
+        // this.precursorCharge = +identification.pc_c;
+        // if (this.precursorCharge === -1) {
+        //     this.precursorCharge = undefined;
+        // }
 
         this.matchedPeptides = [];
         this.matchedPeptides[0] = peptides.get(this.searchId + "_" + identification.pi1);
@@ -190,22 +190,22 @@ export class PrideSpectrumMatch extends SpectrumMatch{
 
 
     expMass() {
-        return this.precursorMZ * this.precursorCharge - (this.precursorCharge * PrideSpectrumMatch.protonMass);
+        return this.precursorMZ * this.precursorCharge - (this.precursorCharge * SpectrumMatch.protonMass);
     }
 
     calcMZ() {
-        return this.calc_mz;// (this.calc_mass + (this.precursorCharge * PrideSpectrumMatch.protonMass)) / this.precursorCharge;
+        return this.calc_mz;// (this.calc_mass + (this.precursorCharge * SpectrumMatch.protonMass)) / this.precursorCharge;
     }
 
     calcMass() {
-        return (this.precursorCharge * this.calc_mz) - (this.precursorCharge * PrideSpectrumMatch.protonMass); //this.calc_mass;
+        return (this.precursorCharge * this.calc_mz) - (this.precursorCharge * SpectrumMatch.protonMass); //this.calc_mass;
     }
 
     missingPeaks() {
         const errorMZ = this.expMZ() - this.calcMZ();
         const errorM = errorMZ * this.precursorCharge;
         //how many peaks assumed missing/miss-assigned
-        return Math.round(errorM / PrideSpectrumMatch.C13_MASS_DIFFERENCE);
+        return Math.round(errorM / SpectrumMatch.C13_MASS_DIFFERENCE);
     }
 
     massError() {
@@ -301,7 +301,76 @@ export class PrideSpectrumMatch extends SpectrumMatch{
         return this.spectrumId;
         // }
     }
+
+    get spectrumId() {
+        return this.identification.sp;
+    }
+
+    get searchId() {
+        return this.identification.si.toString();
+    }
+
+    get precursor_intensity() {
+        return null;
+    }
+
+    get elution_time_start() {
+        return null;
+    }
+
+    get elution_time_end() {
+        return null;
+    }
+
+    get _scores() {
+        return this.identification.sc;
+    }
+
+    get precursorCharge() {
+        const c = +this.identification.pc_c;
+        return c === -1 ? undefined : c;
+    }
+
+    get precursorMZ() {
+        return +this.identification.pc_mz;
+    }
+
+    get calc_mz() {
+        return +this.identification.c_mz;
+    }
+
+    get passThreshold() {
+        return !!this.identification.pass;
+    }
+
+    get ions() {
+        if (this.identification.ions) {
+            var ionTypes = this.identification.ions.split(";");
+            var ionTypeCount = ionTypes.length;
+            var ions = [];
+            for (var it = 0; it < ionTypeCount; it++) {
+                var ionType = ionTypes[it];
+                ions.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
+            }
+            return ions;
+        } else {
+            return [{type:"bIon"}, {type:"yIon"}];
+        }
+    }
+
+    get spectrum() {
+        return this.containingModel.get("spectrumSources").get(this.searchId + "_" + this.spectrumId);
+    }
+
+    // get linkPos1() {
+    //     return +this.matchedPeptides[0].linkSite;
+    // }
+    //
+    // get linkPos2() {
+    //     if (this.matchedPeptides[1]) {
+    //         this.linkPos2 = this.matchedPeptides[1].linkSite;
+    //     }
+    //     return undefined;
+    // }
 }
 
-PrideSpectrumMatch.protonMass = 1.007276466879;
-PrideSpectrumMatch.C13_MASS_DIFFERENCE = 1.0033548;

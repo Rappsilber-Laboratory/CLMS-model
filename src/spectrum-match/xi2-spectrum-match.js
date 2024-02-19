@@ -392,7 +392,7 @@ export class Xi2SpectrumMatch extends SpectrumMatch {
     }
 
     get spectrumId() {
-        return this.identification.sp_id;
+        return this.identification.sp;
     }
 
     get searchId() {
@@ -412,11 +412,11 @@ export class Xi2SpectrumMatch extends SpectrumMatch {
     }
 
     get precursor_intensity() {
-        return null;
+        return +this.identification.pc_i;
     }
 
     get elution_time_start() {
-        return null;
+        return +this.identification.rt;
     }
 
     get elution_time_end() {
@@ -432,7 +432,7 @@ export class Xi2SpectrumMatch extends SpectrumMatch {
     }
 
     get precursorCharge() {
-        const c = this.identification.pc_c;
+        const c = +this.identification.pc_c;
         return c === -1 ? undefined : c;
     }
 

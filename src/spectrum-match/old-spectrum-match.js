@@ -5,15 +5,8 @@ export class OldSpectrumMatch extends SpectrumMatch{
     constructor(containingModel, participants, crosslinks, peptides, identification) {
         super();
         this.containingModel = containingModel; //containing BB model
-	    this.identification = identification;
-        this.spectrumId = +identification.sp;
-        this.searchId = identification.si.toString();
-        this.precursor_intensity = null;
-        this.id = this.searchId + "_" + identification.id;
-        this.precursorMZ = +identification.e_mz; // experimental MZ, accessor for this att is called expMZ()
-        this.calc_mz = +identification.c_mz;
+        this.identification = identification;
 
-        this._scores = identification.sc;
         var scoreSets = Object.keys(this._scores);
         var scoreSetCount = scoreSets.length;
         for (var s = 0; s < scoreSetCount; s++) {
@@ -21,24 +14,40 @@ export class OldSpectrumMatch extends SpectrumMatch{
             this.containingModel.get("scoreSets").add(scoreSet);
         }
 
-        this.passThreshold = (identification.pass == "t");
-        if (identification.ions) {
-            var ionTypes = identification.ions.split(";");
-            var ionTypeCount = ionTypes.length;
-            var ions = [];
-            for (var it = 0; it < ionTypeCount; it++) {
-                var ionType = ionTypes[it];
-                ions.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
-            }
-            this.ions = ions;
-        }
 
-        this.spectrum = this.containingModel.get("spectrumSources").get(this.searchId + "_" + this.spectrumId);
-
-        this.precursorCharge = +identification.pc_c;
-        // if (this.precursorCharge == -1) { //dodgy?
-        //     this.precursorCharge = undefined;
+        // this.spectrumId = +identification.sp;
+        // this.searchId = identification.si.toString();
+        // this.precursor_intensity = null;
+        // this.id = this.searchId + "_" + identification.id;
+        // this.precursorMZ = +identification.e_mz; // experimental MZ, accessor for this att is called expMZ()
+        // this.calc_mz = +identification.c_mz;
+        //
+        // this._scores = identification.sc;
+        // var scoreSets = Object.keys(this._scores);
+        // var scoreSetCount = scoreSets.length;
+        // for (var s = 0; s < scoreSetCount; s++) {
+        //     var scoreSet = scoreSets[s];
+        //     this.containingModel.get("scoreSets").add(scoreSet);
         // }
+        //
+        // this.passThreshold = (identification.pass == "t");
+        // if (identification.ions) {
+        //     var ionTypes = identification.ions.split(";");
+        //     var ionTypeCount = ionTypes.length;
+        //     var ions = [];
+        //     for (var it = 0; it < ionTypeCount; it++) {
+        //         var ionType = ionTypes[it];
+        //         ions.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
+        //     }
+        //     this.ions = ions;
+        // }
+        //
+        // this.spectrum = this.containingModel.get("spectrumSources").get(this.searchId + "_" + this.spectrumId);
+        //
+        // this.precursorCharge = +identification.pc_c;
+        // // if (this.precursorCharge == -1) { //dodgy?
+        // //     this.precursorCharge = undefined;
+        // // }
 
         this.matchedPeptides = [];
         this.matchedPeptides[0] = peptides.get(this.searchId + "_" + identification.pi1);
@@ -203,7 +212,7 @@ export class OldSpectrumMatch extends SpectrumMatch{
 
 
     expMass() {
-        return this.precursorMZ * this.precursorCharge - (this.precursorCharge * OldSpectrumMatch.protonMass);
+        return this.precursorMZ * this.precursorCharge - (this.precursorCharge * SpectrumMatch.protonMass);
     }
 
     calcMZ() {
@@ -211,7 +220,7 @@ export class OldSpectrumMatch extends SpectrumMatch{
     }
 
     calcMass() {
-        return (this.precursorCharge * this.calc_mz) - (this.precursorCharge * OldSpectrumMatch.protonMass); //this.calc_mass;
+        return (this.precursorCharge * this.calc_mz) - (this.precursorCharge * SpectrumMatch.protonMass); //this.calc_mass;
     }
 
     massError() {
@@ -222,7 +231,7 @@ export class OldSpectrumMatch extends SpectrumMatch{
         const errorMZ = this.expMZ() - this.calcMZ();
         const errorM = errorMZ * this.precursorCharge;
         //how many peaks assumed missing/miss-assigned
-        return Math.round(errorM / OldSpectrumMatch.C13_MASS_DIFFERENCE);
+        return Math.round(errorM / SpectrumMatch.C13_MASS_DIFFERENCE);
     }
 
     ionTypes() {
@@ -317,7 +326,74 @@ export class OldSpectrumMatch extends SpectrumMatch{
             return undefined;
         }
     }
-}
 
-OldSpectrumMatch.protonMass = 1.007276466879;
-OldSpectrumMatch.C13_MASS_DIFFERENCE = 1.0033548;
+    get spectrumId() {
+        return this.identification.sp;
+    }
+
+    get searchId() {
+        return this.identification.si.toString();
+    }
+
+    get precursor_intensity() {
+        return null;
+    }
+
+    get elution_time_start() {
+        return null;
+    }
+
+    get elution_time_end() {
+        return null;
+    }
+
+    get _scores() {
+        return this.identification.sc;
+    }
+
+    get precursorCharge() {
+        const c = +this.identification.pc_c;
+        return c === -1 ? undefined : c;
+    }
+
+    get precursorMZ() {
+        return +this.identification.e_mz;
+    }
+
+    get calc_mz() {
+        return +this.identification.c_mz;
+    }
+
+    get passThreshold() {
+        return this.identification.pass === "t";
+    }
+
+    get ions() {
+        if (this.identification.ions) {
+            var ionTypes = this.identification.ions.split(";");
+            var ionTypeCount = ionTypes.length;
+            var ions = [];
+            for (var it = 0; it < ionTypeCount; it++) {
+                var ionType = ionTypes[it];
+                ions.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
+            }
+            return ions;
+        }
+        return undefined;
+    }
+
+    get spectrum() {
+        return this.containingModel.get("spectrumSources").get(this.searchId + "_" + this.spectrumId);
+    }
+
+    // get linkPos1() {
+    //     return +this.matchedPeptides[0].linkSite;
+    // }
+    //
+    // get linkPos2() {
+    //     if (this.matchedPeptides[1]) {
+    //         this.linkPos2 = this.matchedPeptides[1].linkSite;
+    //     }
+    //     return undefined;
+    // }
+}
