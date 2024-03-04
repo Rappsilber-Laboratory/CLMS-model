@@ -137,6 +137,10 @@ export class SpectrumMatch {
         }
     }
 
+    get id () {
+        return this.psmId;
+    }
+
 }
 
 
