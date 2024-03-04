@@ -188,7 +188,6 @@ export class PrideSpectrumMatch extends SpectrumMatch{
         return this.precursorMZ;
     }
 
-
     expMass() {
         return this.precursorMZ * this.precursorCharge - (this.precursorCharge * SpectrumMatch.protonMass);
     }
