@@ -4,6 +4,7 @@ import * as Backbone from "backbone";
 import {PrideSpectrumMatch} from "./spectrum-match/pride-spectrum-match";
 import {Xi2SpectrumMatch} from "./spectrum-match/xi2-spectrum-match";
 import {OldSpectrumMatch} from "./spectrum-match/old-spectrum-match";
+import {Peptide} from "./peptide";
 //import {Peptide} from "./peptide";
 
 export class SearchResultsModel extends Backbone.Model {
@@ -252,7 +253,7 @@ export class SearchResultsModel extends Backbone.Model {
                         for (let peptide of json.peptides) {
                             SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
                             peptide.sequence = peptide.base_seq;//seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
-                            peptides.set(peptide.u_id + "_" + peptide.id, peptide); // concat upload_id and peptide.id
+                            peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
                             for (var p = 0; p < peptide.prt.length; p++) {
                                 if (peptide.is_decoy[p]) {
                                     const protein = participants.get(peptide.prt[p]);
@@ -278,7 +279,7 @@ export class SearchResultsModel extends Backbone.Model {
                         for (let peptide of json.peptides) {
                             SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
                             peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
-                            peptides.set(peptide.u_id + "_" + peptide.id, peptide); // concat upload_id and peptide.id
+                            peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
 
                             for (var p = 0; p < peptide.prt.length; p++) {
                                 const protein = tempParticipants.get(peptide.prt[p]);
@@ -489,7 +490,9 @@ export class SearchResultsModel extends Backbone.Model {
                 protObj.sequence = "";
             }
         }
-        protObj.size = protObj.sequence.length;
+        if (protObj.sequence) {
+            protObj.size = protObj.sequence.length;
+        }
 
         protObj.form = 0;
 

@@ -1,11 +1,11 @@
 import {SearchResultsModel} from "./search-results-model";
 
 export class Peptide {
-    constructor(pep, containingModel) {
+    constructor(pep){ //}, containingModel) {
         // console.assert(pep.mod_mass.length == pep.mod_acc.length &&  pep.mod_acc.length == pep.mod_pos.length, "Inconsistent mod data on peptide", pep);
         this._pep = pep;
-        this.modificationNames = containingModel.get("modificationNames");
-        SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
+        // this.modificationNames = containingModel.get("modificationNames");
+        // SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
         // if (){
         //     peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
         // }
