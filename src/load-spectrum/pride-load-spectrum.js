@@ -7,9 +7,9 @@ export const prideLoadSpectrum = function (match, randId) {
     const modMap = new Map();
     function createModSequence(peptide) {
         let seqMods = "";
-        const pepLen = peptide.base_seq.length;
+        const pepLen = peptide.sequence.length;
         for (let i = 0; i < pepLen; i++) {
-            seqMods += peptide.base_seq[i];
+            seqMods += peptide.sequence[i];
             if (peptide.mod_pos.indexOf(i + 1) !== -1){
                 const modIndex = peptide.mod_pos.indexOf(i + 1);
                 const modName = "(" + peptide.mod_masses[modIndex] + ")";

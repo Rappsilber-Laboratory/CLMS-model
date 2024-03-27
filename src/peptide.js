@@ -82,12 +82,16 @@ export class Peptide {
         return this._pep.mod_pos;
     }
 
-    get mod_mass() {
-        return this._pep.mod_mass;
+    get mod_masses() {
+        return this._pep.mod_masses;
     }
 
     get mod_acc() {
         return this._pep.mod_acc;
+    }
+
+    get cl_modmass(){
+        return this._pep.cl_modmass;
     }
 
 }
