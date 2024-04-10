@@ -16,7 +16,11 @@ export class Crosslink {
     }
 
     isSelfLink() {
-        return this.fromProtein && this.toProtein && this.fromProtein.targetProteinID === this.toProtein.targetProteinID; // mjg
+        return this.fromProtein && this.toProtein && (
+            (this.fromProtein.targetProteinID === this.toProtein.targetProteinID)  // essentially, a hack for some csv files
+            || (this.fromProtein.id === this.toProtein.id)
+            || (this.fromProtein.accession === this.toProtein.accession)
+        );
     }
 
     isLinearLink() {

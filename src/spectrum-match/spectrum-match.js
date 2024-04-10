@@ -42,7 +42,10 @@ export class SpectrumMatch {
             }
         }
 
-        if (fromProt && toProt && fromProt.targetProteinID === toProt.targetProteinID) {
+        if (fromProt && toProt && // todo - see crosslink.js for similar code
+            (fromProt.targetProteinID === toProt.targetProteinID)  // essentially, a hack for some csv files
+            || (fromProt.id === toProt.id)
+            || (fromProt.accession === toProt.accession)) {
             this.couldBelongToSelfLink = true;
         } else if (!this.isMonoLink()) {
             this.couldBelongToBetweenLink = true;
