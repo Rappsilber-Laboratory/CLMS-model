@@ -206,7 +206,9 @@ export class SearchResultsModel extends Backbone.Model {
             }
 
             //console.log("CROSS", linkableResSets);
-            this.set("crosslinkerSpecificity", linkableResSets);
+            if (this.get("serverFlavour") === "XI2") { // hacky, crosslinker specificity not working in other systems
+                this.set("crosslinkerSpecificity", linkableResSets);
+            }
 
             //saved config should end up including filter settings not just xiNET layout
             this.set("xiNETLayout", json.xiNETLayout);
