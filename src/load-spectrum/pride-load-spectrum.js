@@ -50,7 +50,7 @@ export const prideLoadSpectrum = function (match, randId) {
     console.log("prideLoadSpectrum match:" + match.id);
 
     d3.json(window.peakListUrl + "?id=" +  encodeURIComponent(match.spectrumId)
-                    + "&sd_ref=" +  encodeURIComponent(match.identification.sd_ref)
+                    + "&sd_ref=" +  encodeURIComponent(match.identification.sd)
                     + "&upload_id=" +  encodeURIComponent(match.searchId), function (error, json) {
         if (error) {
             console.log("error getting peak list", json);

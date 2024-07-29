@@ -257,7 +257,7 @@ export class SearchResultsModel extends Backbone.Model {
                             peptide.sequence = peptide.base_seq;//seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
                             peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
                             for (var p = 0; p < peptide.prt.length; p++) {
-                                if (peptide.is_decoy[p]) {
+                                if (peptide.dec[p]) {
                                     const protein = participants.get(peptide.prt[p]);
                                     if (!protein) {
                                         console.error("Protein not found for peptide (not aggregated data)", peptide, peptide.prt[p]);
@@ -288,7 +288,7 @@ export class SearchResultsModel extends Backbone.Model {
                                 if (!protein) {
                                     console.error("Protein not found for peptide (aggregated data)", peptide, peptide.prt[p]);
                                 }
-                                if (peptide.is_decoy[p]) {
+                                if (peptide.dec[p]) {
                                     const decoyId = "DECOY_" + protein.accession;
                                     protein.is_decoy = true;
                                     protein.id = decoyId;

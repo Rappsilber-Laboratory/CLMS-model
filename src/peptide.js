@@ -37,7 +37,7 @@ export class Peptide {
     }
 
     get linkSite(){
-        return this._pep.site1;
+        return this._pep.ls1;
     }
 
     get prt(){
@@ -49,15 +49,15 @@ export class Peptide {
     }
 
     get is_decoy(){
-        return this._pep.is_decoy;
+        return this._pep.dec;
     }
 
     get sequence() {
-        return this._pep.base_seq;
+        return this._pep.seq;
     }
 
     get seq_mods() {
-        return this._pep.base_seq;
+        return this._pep.seq;
         // let seq_mods = "";
         // let lastIndex = 0;
         // for (let i = 0; i < this._pep.mod_pos.length; i++){
@@ -79,19 +79,19 @@ export class Peptide {
     }
 
     get mod_pos() {
-        return this._pep.mod_pos;
+        return this._pep.m_ps;
     }
 
     get mod_masses() {
-        return this._pep.mod_masses;
+        return this._pep.m_ms;
     }
 
     get mod_acc() {
-        return this._pep.mod_acc;
+        return this._pep.m_as;
     }
 
     get cl_modmass(){
-        return this._pep.cl_modmass;
+        return this._pep.cl_m;
     }
 
 }

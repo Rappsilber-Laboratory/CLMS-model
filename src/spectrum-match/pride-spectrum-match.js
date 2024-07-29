@@ -339,7 +339,7 @@ export class PrideSpectrumMatch extends SpectrumMatch{
     }
 
     get passThreshold() {
-        return !!this.identification.pass;
+        return !!this.identification.p;
     }
 
     get ions() {
