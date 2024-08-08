@@ -269,6 +269,10 @@ export class OldSpectrumMatch extends SpectrumMatch{
     score() {
         //return this._scores.score;
         var scoreSets = this.containingModel.get("scoreSets");
+        if (scoreSets.has("Mascot:expectation value")) {
+            // const s =
+            return this._scores["Mascot:expectation value"];
+        }
         //if (scoreSets.size == 1) {
         var scoreSet = scoreSets.keys().next().value;
         var s = this._scores[scoreSet];
