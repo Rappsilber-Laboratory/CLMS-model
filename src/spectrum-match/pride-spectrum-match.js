@@ -52,7 +52,7 @@ export class PrideSpectrumMatch extends SpectrumMatch{
             }
         }
         // following will be inadequate for trimeric and higher order cross-links
-        if (identification.pi2) {
+        if (identification.pi2 !== undefined) {
             this.matchedPeptides[1] = peptides.get(this.searchId + "_" + identification.pi2);
             if (!this.matchedPeptides[1]) {
                 alert("peptide error (missing peptide evidence?) for:" + +identification.pi2);
