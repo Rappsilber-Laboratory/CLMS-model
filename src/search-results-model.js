@@ -31,12 +31,28 @@ export class SearchResultsModel extends Backbone.Model {
         };
     }
 
+    processMetadata(data) {
+        this.metadata = data;
+    }
+
+    processMatches(data) {
+        this.matches = data;
+    }
+
+    processPeptides(data) {
+        this.peptides = data;
+    }
+
+    processProteins(data) {
+        this.proteins = data;
+    }
+
     //our SpectrumMatches are constructed from the rawMatches and peptides arrays in this json
     parseJSON(json) {
-        if (json) {
+        // if (json) {
             const self = this;
-            this.set("sid", json.sid);
-            if (this.get("serverFlavour") === "PRIDE") {
+            // this.set("sid", json.sid);
+            // if (this.get("serverFlavour") === "PRIDE") {
                 //modifications
                 // short term hack - index mod names by accession
                 const modificationNames = new Map();
@@ -45,45 +61,45 @@ export class SearchResultsModel extends Backbone.Model {
                 // }
                 this.set("modificationNames", modificationNames);
                 this.set("primaryScore", {score_name:"Match Score"});
-            } else if (this.get("serverFlavour") === "XI2") {
-                this.set("decoysPresent", true);
-                this.set("primaryScore", json.primary_score);
-            } else if (this.get("serverFlavour") === "XIVIEW.ORG") {
-                this.set("primaryScore", {score_name:"Match Score"});
-                //modifications
-                var modifications = [];
-                var modCount = json.modifications.length;
-                for (var m = 0; m < modCount; m++) {
-                    var mod = json.modifications[m];
-                    modifications.push({
-                        aminoAcids: mod.residues.split(""),
-                        id: mod.mod_name,
-                        mass: mod.mass
-                    });
-                }
-                this.set("modifications", modifications);
-            }
+            // } else if (this.get("serverFlavour") === "XI2") {
+            //     this.set("decoysPresent", true);
+            //     this.set("primaryScore", json.primary_score);
+            // } else if (this.get("serverFlavour") === "XIVIEW.ORG") {
+            //     this.set("primaryScore", {score_name:"Match Score"});
+            //     //modifications
+            //     var modifications = [];
+            //     var modCount = json.modifications.length;
+            //     for (var m = 0; m < modCount; m++) {
+            //         var mod = json.modifications[m];
+            //         modifications.push({
+            //             aminoAcids: mod.residues.split(""),
+            //             id: mod.mod_name,
+            //             mass: mod.mass
+            //         });
+            //     }
+            //     this.set("modifications", modifications);
+            // }
 
             //search meta data
             const searches = new Map();
-            for (let propertyName in json.searches) {
-                const search = json.searches[propertyName];
-                searches.set(propertyName, search);
-            }
+            // for (let propertyName in json.searches) {
+            //     const search = json.searches[propertyName];
+            //     searches.set(propertyName, search);
+            // }
             this.set("searches", searches);
 
-            const getResiduesFromEnzymeDescription = function (regexMatch, residueSet) {
-                if (regexMatch && regexMatch.length > 1) {
-                    const resArray = regexMatch[1].split(",");
-                    const resCount = resArray.length;
-                    for (let r = 0; r < resCount; r++) {
-                        residueSet.add({
-                            aa: resArray[r],
-                            postConstraint: regexMatch[2] ? regexMatch[2].split(",") : null
-                        });
-                    }
-                }
-            };
+            // const getResiduesFromEnzymeDescription = function (regexMatch, residueSet) {
+            //     if (regexMatch && regexMatch.length > 1) {
+            //         const resArray = regexMatch[1].split(",");
+            //         const resCount = resArray.length;
+            //         for (let r = 0; r < resCount; r++) {
+            //             residueSet.add({
+            //                 aa: resArray[r],
+            //                 postConstraint: regexMatch[2] ? regexMatch[2].split(",") : null
+            //             });
+            //         }
+            //     }
+            // };
 
             //enzyme specificity
             // TODO _ seems like theres a duplication problem here if multiple searches are aggregated
@@ -205,54 +221,54 @@ export class SearchResultsModel extends Backbone.Model {
                 });
             }
 
-            //console.log("CROSS", linkableResSets);
-            if (this.get("serverFlavour") === "XI2") { // hacky, crosslinker specificity not working in other systems
-                this.set("crosslinkerSpecificity", linkableResSets);
-            }
-
-            //saved config should end up including filter settings not just xiNET layout
-            this.set("xiNETLayout", json.xiNETLayout);
+            // //console.log("CROSS", linkableResSets);
+            // if (this.get("serverFlavour") === "XI2") { // hacky, crosslinker specificity not working in other systems
+            //     this.set("crosslinkerSpecificity", linkableResSets);
+            // }
+            //
+            // //saved config should end up including filter settings not just xiNET layout
+            // this.set("xiNETLayout", json.xiNETLayout);
             const spectrumSources = new Map();
-            if (this.get("serverFlavour") === "XI2") {
-                //spectrum sources
-                let specSource;
-                for (let propertyName in json.spectrumSources) {
-                    specSource = json.spectrumSources[propertyName];
-                    spectrumSources.set(+specSource.id, specSource.name);
-                }
-
-                //peak list files
-                const peakListFiles = new Map();
-                let plFile;
-                for (let propertyName in json.peakListFiles) {
-                    plFile = json.peakListFiles[propertyName];
-                    peakListFiles.set(+plFile.id, plFile.name);
-                }
-                this.set("peakListFiles", peakListFiles);
-            } else if (this.get("serverFlavour") === "XIVIEW.ORG") {
-                //spectrum sources
-                var specSource;
-                var specCount = json.spectra.length;
-                for (var sp = 0; sp < specCount; sp++) {
-                    specSource = json.spectra[sp];
-                    spectrumSources.set(specSource.up_id + "_" + specSource.id, specSource);
-                }
-            }
+            // if (this.get("serverFlavour") === "XI2") {
+            //     //spectrum sources
+            //     let specSource;
+            //     for (let propertyName in json.spectrumSources) {
+            //         specSource = json.spectrumSources[propertyName];
+            //         spectrumSources.set(+specSource.id, specSource.name);
+            //     }
+            //
+            //     //peak list files
+            //     const peakListFiles = new Map();
+            //     let plFile;
+            //     for (let propertyName in json.peakListFiles) {
+            //         plFile = json.peakListFiles[propertyName];
+            //         peakListFiles.set(+plFile.id, plFile.name);
+            //     }
+            //     this.set("peakListFiles", peakListFiles);
+            // } else if (this.get("serverFlavour") === "XIVIEW.ORG") {
+            //     //spectrum sources
+            //     var specSource;
+            //     var specCount = json.spectra.length;
+            //     for (var sp = 0; sp < specCount; sp++) {
+            //         specSource = json.spectra[sp];
+            //         spectrumSources.set(specSource.up_id + "_" + specSource.id, specSource);
+            //     }
+            // }
             this.set("spectrumSources", spectrumSources);
 
             const participants = this.get("participants");
             const peptides = new Map();
-            if (this.get("serverFlavour") === "PRIDE") {
+            // if (this.get("serverFlavour") === "PRIDE") {
                 if (!this.isAggregatedData()) {
-                    if (json.proteins) {
-                        for (let participant of json.proteins) {
+                    if (this.proteins) {
+                        for (let participant of this.proteins) {
                             this.initProtein(participant, json);
                             participants.set(participant.id, participant);
                         }
                     }
                     //peptides
-                    if (json.peptides) {
-                        for (let peptide of json.peptides) {
+                    if (this.peptides) {
+                        for (let peptide of this.peptides) {
                             SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
                             peptide.sequence = peptide.base_seq;//seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
                             peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
@@ -270,15 +286,15 @@ export class SearchResultsModel extends Backbone.Model {
                     }
                 } else {
                     var tempParticipants = new Map();
-                    if (json.proteins) {
+                    if (this.proteins) {
                         for (let participant of json.proteins) {
                             this.initProtein(participant, json);
                             tempParticipants.set(participant.id, participant);
                         }
                     }
                     //peptides
-                    if (json.peptides) {
-                        for (let peptide of json.peptides) {
+                    if (this.peptides) {
+                        for (let peptide of this.peptides) {
                             SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
                             peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
                             peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
@@ -311,72 +327,72 @@ export class SearchResultsModel extends Backbone.Model {
                     }
 
                 }
-            } else if (this.get("serverFlavour") === "XI2") {
-
-                if (json.proteins) {
-                    for (let protein of json.proteins) {
-                        this.initProtein(protein);
-                        participants.set(protein.id, protein);
-                    }
-                }
-
-                //peptides
-                if (json.peptides) {
-                    const peptideArray = json.peptides;
-                    const pepCount = peptideArray.length;
-                    let peptide;
-                    for (let pep = 0; pep < pepCount; pep++) {
-                        SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
-                        peptide = peptideArray[pep];
-                        peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
-                        peptides.set(peptide.search_id + "_" + peptide.id, peptide);
-                    }
-                }
-                
-            } else if (this.get("serverFlavour") === "XIVIEW.ORG") {
-                var tempParticipants = new Map();
-                
-                if (json.proteins) {
-                    for (let participant of json.proteins) {
-                        this.initProtein(participant, json);
-                        tempParticipants.set(participant.id, participant);
-                    }
-                }
-                //peptides
-                if (json.peptides) {
-                    for (let peptide of json.peptides) {
-
-                        SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
-                        peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
-                        peptides.set(peptide.u_id + "_" + peptide.id, peptide); // concat upload_id and peptide.id
-
-                        for (var p = 0; p < peptide.prt.length; p++) {
-                            const protein = tempParticipants.get(peptide.prt[p]);
-                            if (!protein) {
-                                console.error("Protein not found for peptide (aggregated data)", peptide, peptide.prt[p]);
-                            }
-                            if (peptide.is_decoy[p]) {
-                                const decoyId = "DECOY_" + protein.accession;
-                                protein.is_decoy = true;
-                                protein.id = decoyId;
-                                // how to get prot acc after id has been changed?
-                                peptide.prt[p] = decoyId;
-                                this.set("decoysPresent", true);
-                            } else {
-                                // fix ids for target in aggregated data
-                                protein.id = protein.accession;
-                                peptide.prt[p] = protein.accession;
-
-                            }
-
-                        }
-                    }
-                }
-
-                for (let participant of tempParticipants.values()) {
-                    participants.set(participant.id, participant);
-                }
-            }
+            // } else if (this.get("serverFlavour") === "XI2") {
+            //
+            //     if (json.proteins) {
+            //         for (let protein of json.proteins) {
+            //             this.initProtein(protein);
+            //             participants.set(protein.id, protein);
+            //         }
+            //     }
+            //
+            //     //peptides
+            //     if (json.peptides) {
+            //         const peptideArray = json.peptides;
+            //         const pepCount = peptideArray.length;
+            //         let peptide;
+            //         for (let pep = 0; pep < pepCount; pep++) {
+            //             SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
+            //             peptide = peptideArray[pep];
+            //             peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
+            //             peptides.set(peptide.search_id + "_" + peptide.id, peptide);
+            //         }
+            //     }
+            //
+            // } else if (this.get("serverFlavour") === "XIVIEW.ORG") {
+            //     var tempParticipants = new Map();
+            //
+            //     if (json.proteins) {
+            //         for (let participant of json.proteins) {
+            //             this.initProtein(participant, json);
+            //             tempParticipants.set(participant.id, participant);
+            //         }
+            //     }
+            //     //peptides
+            //     if (json.peptides) {
+            //         for (let peptide of json.peptides) {
+            //
+            //             SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
+            //             peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
+            //             peptides.set(peptide.u_id + "_" + peptide.id, peptide); // concat upload_id and peptide.id
+            //
+            //             for (var p = 0; p < peptide.prt.length; p++) {
+            //                 const protein = tempParticipants.get(peptide.prt[p]);
+            //                 if (!protein) {
+            //                     console.error("Protein not found for peptide (aggregated data)", peptide, peptide.prt[p]);
+            //                 }
+            //                 if (peptide.is_decoy[p]) {
+            //                     const decoyId = "DECOY_" + protein.accession;
+            //                     protein.is_decoy = true;
+            //                     protein.id = decoyId;
+            //                     // how to get prot acc after id has been changed?
+            //                     peptide.prt[p] = decoyId;
+            //                     this.set("decoysPresent", true);
+            //                 } else {
+            //                     // fix ids for target in aggregated data
+            //                     protein.id = protein.accession;
+            //                     peptide.prt[p] = protein.accession;
+            //
+            //                 }
+            //
+            //             }
+            //         }
+            //     }
+            //
+            //     for (let participant of tempParticipants.values()) {
+            //         participants.set(participant.id, participant);
+            //     }
+            // }
 
             this.initDecoyLookup();
 
@@ -387,24 +403,24 @@ export class SearchResultsModel extends Backbone.Model {
 
             // moved from modelUtils 05/08/19
             // Connect searches to proteins, and add the protein set as a property of a search in the clmsModel, MJG 17/05/17
-            var searchMap = this.getProteinSearchMap(json.peptides, json.matches);
+            var searchMap = this.getProteinSearchMap(this.peptides, this.matches);
             this.get("searches").forEach(function (value, key) {
                 value.participantIDSet = searchMap[key];
             });
 
-            if (json.matches) {
+            if (this.matches) {
                 var matches = this.get("matches");
 
-                var l = json.matches.length;
+                var l = this.matches.length;
                 for (var i = 0; i < l; i++) {
                     let match;
-                    if (this.get("serverFlavour") === "PRIDE") {
-                        match = new PrideSpectrumMatch(this, participants, crosslinks, peptides, json.matches[i]);
-                    } else if (this.get("serverFlavour") === "XI2") {
-                        match = new Xi2SpectrumMatch(this, participants, crosslinks, peptides, json.matches[i]);
-                    } else if (this.get("serverFlavour") === "XIVIEW.ORG") {
-                        match = new OldSpectrumMatch(this, participants, crosslinks, peptides, json.matches[i]);
-                    }
+                    // if (this.get("serverFlavour") === "PRIDE") {
+                        match = new PrideSpectrumMatch(this, participants, crosslinks, peptides, this.matches[i]);
+                    // } else if (this.get("serverFlavour") === "XI2") {
+                    //     match = new Xi2SpectrumMatch(this, participants, crosslinks, peptides, json.matches[i]);
+                    // } else if (this.get("serverFlavour") === "XIVIEW.ORG") {
+                    //     match = new OldSpectrumMatch(this, participants, crosslinks, peptides, json.matches[i]);
+                    // }
                     matches.push(match);
 
                     if (maxScore === undefined || match.score() > maxScore) {
@@ -426,12 +442,12 @@ export class SearchResultsModel extends Backbone.Model {
                 return !p.is_decoy;
             });
 
-            for (let participant of targetParticipantArray) {
-                participant.uniprot = json.interactors ? json.interactors[participant.accession.split("-")[0]] : null;
-            }
+            // for (let participant of targetParticipantArray) {
+            //     participant.uniprot = json.interactors ? json.interactors[participant.accession.split("-")[0]] : null;
+            // }
 
-            window.vent.trigger("uniprotDataParsed", self);
-        }
+            // window.vent.trigger("uniprotDataParsed", self);
+        // }
 
     }
 
@@ -477,21 +493,21 @@ export class SearchResultsModel extends Backbone.Model {
             protObj.crosslinks = [];
         }
         // check serverFlavour
-        if (this.get("serverFlavour") === "PRIDE") {
+        // if (this.get("serverFlavour") === "PRIDE") {
             protObj.is_decoy = false;
-        }
-        else if (this.get("serverFlavour") === "XIVIEW.ORG") {
-            protObj.is_decoy = false;
-            var accCheck = protObj.accession.match(SearchResultsModel.commonRegexes.uniprotAccession);
-            if (protObj.seq_mods) {
-                SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
-                protObj.sequence = protObj.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
-            } else if (accCheck != null && json.interactors[protObj.accession]) {
-                protObj.sequence = json.interactors[protObj.accession].sequence;
-            } else {
-                protObj.sequence = "";
-            }
-        }
+        // }
+        // else if (this.get("serverFlavour") === "XIVIEW.ORG") {
+        //     protObj.is_decoy = false;
+        //     var accCheck = protObj.accession.match(SearchResultsModel.commonRegexes.uniprotAccession);
+        //     if (protObj.seq_mods) {
+        //         SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
+        //         protObj.sequence = protObj.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
+        //     } else if (accCheck != null && json.interactors[protObj.accession]) {
+        //         protObj.sequence = json.interactors[protObj.accession].sequence;
+        //     } else {
+        //         protObj.sequence = "";
+        //     }
+        // }
         if (protObj.sequence) {
             protObj.size = protObj.sequence.length;
         }
