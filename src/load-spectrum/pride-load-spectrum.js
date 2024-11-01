@@ -34,6 +34,9 @@ export const prideLoadSpectrum = function (match, randId) {
     const modifications = [];
     modMap.forEach(function (value, key) {
         modifications.push({id: key, mass: value, aminoAcids: ["*"]});
+        if (value === undefined || value === null) {
+            alert("Failed: modification mass is undefined");
+        }
     });
 
     formatted_data.modifications = modifications;
