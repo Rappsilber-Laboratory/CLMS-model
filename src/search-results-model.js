@@ -5,6 +5,7 @@ import {PrideSpectrumMatch} from "./spectrum-match/pride-spectrum-match";
 import {Xi2SpectrumMatch} from "./spectrum-match/xi2-spectrum-match";
 import {OldSpectrumMatch} from "./spectrum-match/old-spectrum-match";
 import {Peptide} from "./peptide";
+
 //import {Peptide} from "./peptide";
 
 export class SearchResultsModel extends Backbone.Model {
@@ -31,8 +32,206 @@ export class SearchResultsModel extends Backbone.Model {
         };
     }
 
-    processMetadata(data) {
-        this.metadata = data;
+    processMzIdentMLFiles(data) {
+        this.mzIdentMlFiles = data;
+        //search meta data
+        const searches = new Map();
+        // for (let propertyName in json.searches) {
+        //     const search = json.searches[propertyName];
+        //     searches.set(propertyName, search);
+        // }
+        this.set("searches", searches);
+    }
+
+    processAnalysisCollectionSpectrumIdentifications(data) {
+        this.analysisCollectionSpectrumIdentifications = data;
+    }
+
+    processSpectrumIdentificationProtocols(data) {
+        this.spectrumIdentificationProtocols = data;
+    }
+
+    processSpectraData(data) {
+        this.spectraData = data;
+        const spectrumSources = new Map();
+        // if (this.get("serverFlavour") === "XI2") {
+        //     //spectrum sources
+        //     let specSource;
+        //     for (let propertyName in json.spectrumSources) {
+        //         specSource = json.spectrumSources[propertyName];
+        //         spectrumSources.set(+specSource.id, specSource.name);
+        //     }
+        //
+        //     //peak list files
+        //     const peakListFiles = new Map();
+        //     let plFile;
+        //     for (let propertyName in json.peakListFiles) {
+        //         plFile = json.peakListFiles[propertyName];
+        //         peakListFiles.set(+plFile.id, plFile.name);
+        //     }
+        //     this.set("peakListFiles", peakListFiles);
+        // } else if (this.get("serverFlavour") === "XIVIEW.ORG") {
+        //     //spectrum sources
+        //     var specSource;
+        //     var specCount = json.spectra.length;
+        //     for (var sp = 0; sp < specCount; sp++) {
+        //         specSource = json.spectra[sp];
+        //         spectrumSources.set(specSource.up_id + "_" + specSource.id, specSource);
+        //     }
+        // }
+        this.set("spectrumSources", spectrumSources);
+    }
+
+    processEnzymes(data) {
+        this.enzymes = data;
+        // const getResiduesFromEnzymeDescription = function (regexMatch, residueSet) {
+        //     if (regexMatch && regexMatch.length > 1) {
+        //         const resArray = regexMatch[1].split(",");
+        //         const resCount = resArray.length;
+        //         for (let r = 0; r < resCount; r++) {
+        //             residueSet.add({
+        //                 aa: resArray[r],
+        //                 postConstraint: regexMatch[2] ? regexMatch[2].split(",") : null
+        //             });
+        //         }
+        //     }
+        // };
+
+        //enzyme specificity
+        // TODO _ seems like theres a duplication problem here if multiple searches are aggregated
+
+        //eliminate duplication first
+        // const enzymeDescriptions = new Set();
+        // for (let search of searches.values()) {
+        //     for (let enzyme of search.enzymes) {
+        //         enzymeDescriptions.add(enzyme.description);
+        //     }
+        // }
+        //
+        // const postAaSet = new Set();
+        // const aaConstrainedCTermSet = new Set();
+        // const aaConstrainedNTermSet = new Set();
+        //
+        // for (let enzymeDescription of enzymeDescriptions) {
+        //     const postAARegex = /PostAAConstrainedDigestion:DIGESTED:(.*?);ConstrainingAminoAcids:(.*?);/g;
+        //     const postAAMatch = postAARegex.exec(enzymeDescription);
+        //     getResiduesFromEnzymeDescription(postAAMatch, postAaSet);
+        //
+        //     const cTermRegex = /CTERMDIGEST:(.*?);/g;
+        //     const ctMatch = cTermRegex.exec(enzymeDescription);
+        //     getResiduesFromEnzymeDescription(ctMatch, aaConstrainedCTermSet);
+        //
+        //     const nTermRegex = /NTERMDIGEST:(.*?);/g;
+        //     const ntMatch = nTermRegex.exec(enzymeDescription);
+        //     getResiduesFromEnzymeDescription(ntMatch, aaConstrainedNTermSet);
+        // }
+        //
+        // const addEnzymeSpecificityResidues = function (residueSet, type) {
+        //     const resArray = Array.from(residueSet.values());
+        //     const resCount = resArray.length;
+        //     for (let r = 0; r < resCount; r++) {
+        //         enzymeSpecificity.push({
+        //             aa: resArray[r].aa,
+        //             type: type,
+        //             postConstraint: resArray[r].postConstraint
+        //         });
+        //     }
+        // };
+
+        const enzymeSpecificity = [];
+        // addEnzymeSpecificityResidues(postAaSet, "DIGESTIBLE"); //"Post AA constrained");
+        // addEnzymeSpecificityResidues(aaConstrainedCTermSet, "DIGESTIBLE"); // "AA constrained c-term");
+        // addEnzymeSpecificityResidues(aaConstrainedNTermSet, "DIGESTIBLE"); // "AA constrained n-term");
+        this.set("enzymeSpecificity", enzymeSpecificity);
+    }
+
+    processSearchModifications(data) {
+        this.searchModifications = data;
+        //modifications
+        // short term hack - index mod names by accession
+        const modificationNames = new Map();
+        // for (let mod of json.modifications){
+        //     modificationNames.set(mod.accession, mod.mod_name);
+        // }
+        this.set("modificationNames", modificationNames);
+
+        // //crosslink specificity
+        //         /*var linkableResSet = new Set();
+        //         for (var s = 0; s < searchCount; s++) {
+        //             var search = searchArray[s];
+        //             var crosslinkers = search.crosslinkers || [];
+        //             var crosslinkerCount = crosslinkers.length;
+        //             for (var cl = 0; cl < crosslinkerCount; cl++) {
+        //                 var crosslinkerDescription = crosslinkers[cl].description;
+        //                 var linkedAARegex = /LINKEDAMINOACIDS:(.*?)(?:;|$)/g;
+        //                 var result = null;
+        //                 while ((result = linkedAARegex.exec(crosslinkerDescription)) !== null) {
+        //                     var resArray = result[1].split(',');
+        //                     var resCount = resArray.length;
+        //                     for (var r = 0; r < resCount; r++) {
+        //                         var resRegex = /([A-Z])(.*)?/
+        //                         var resMatch = resRegex.exec(resArray[r]);
+        //                         if (resMatch) {
+        //                             linkableResSet.add(resMatch[1]);
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //         this.set("crosslinkerSpecificity", CLMS.arrayFromMapValues(linkableResSet));*/
+        //
+        //         const linkableResSets = {};
+        //         for (let search of searches.values()) {
+        //             const crosslinkers = search.crosslinkers || [];
+        //
+        //             crosslinkers.forEach(function (crosslinker) {
+        //                 const crosslinkerDescription = crosslinker.description;
+        //                 const crosslinkerName = crosslinker.name;
+        //                 const linkedAARegex = /LINKEDAMINOACIDS:(.*?)(?:;|$)/g; // capture both sets if > 1 set
+        //                 // //console.log("cld", crosslinkerDescription);
+        //                 let resSet = linkableResSets[crosslinkerName];
+        //
+        //                 if (!resSet) {
+        //                     resSet = {
+        //                         searches: new Set(),
+        //                         linkables: [],
+        //                         name: crosslinkerName,
+        //                         id: +crosslinker.id
+        //                     };
+        //                     linkableResSets[crosslinkerName] = resSet;
+        //                 }
+        //                 resSet.searches.add(search.id);
+        //
+        //                 let result = null;
+        //                 let i = 0;
+        //                 while ((result = linkedAARegex.exec(crosslinkerDescription)) !== null) {
+        //                     if (!resSet.linkables[i]) {
+        //                         resSet.linkables[i] = new Set();
+        //                     }
+        //
+        //                     const resArray = result[1].split(",");
+        //                     resArray.forEach(function (res) {
+        //                         const resRegex = /(cterm|nterm|[A-Z])(.*)?/i;
+        //                         const resMatch = resRegex.exec(res);
+        //                         if (resMatch) {
+        //                             resSet.linkables[i].add(resMatch[1].toUpperCase());
+        //                         }
+        //                     });
+        //                     i++;
+        //                 }
+        //
+        //                 if (i === 0) {
+        //                     resSet.linkables.push(new Set(["*"]));  // in case non-covalent
+        //                 }
+        //
+        //                 resSet.heterobi = resSet.heterobi || (i > 1);
+        //             });
+        //         }
+        //
+        //         // //console.log("CROSS", linkableResSets);
+        //         // if (this.get("serverFlavour") === "XI2") { // hacky, crosslinker specificity not working in other systems
+        //         //     this.set("crosslinkerSpecificity", linkableResSets);
+        //         // }
     }
 
     processMatches(data) {
@@ -49,405 +248,133 @@ export class SearchResultsModel extends Backbone.Model {
 
     //our SpectrumMatches are constructed from the rawMatches and peptides arrays in this json
     parseJSON(json) {
-        // if (json) {
-            const self = this;
-            // this.set("sid", json.sid);
-            // if (this.get("serverFlavour") === "PRIDE") {
-                //modifications
-                // short term hack - index mod names by accession
-                const modificationNames = new Map();
-                // for (let mod of json.modifications){
-                //     modificationNames.set(mod.accession, mod.mod_name);
-                // }
-                this.set("modificationNames", modificationNames);
-                this.set("primaryScore", {score_name:"Match Score"});
-            // } else if (this.get("serverFlavour") === "XI2") {
-            //     this.set("decoysPresent", true);
-            //     this.set("primaryScore", json.primary_score);
-            // } else if (this.get("serverFlavour") === "XIVIEW.ORG") {
-            //     this.set("primaryScore", {score_name:"Match Score"});
-            //     //modifications
-            //     var modifications = [];
-            //     var modCount = json.modifications.length;
-            //     for (var m = 0; m < modCount; m++) {
-            //         var mod = json.modifications[m];
-            //         modifications.push({
-            //             aminoAcids: mod.residues.split(""),
-            //             id: mod.mod_name,
-            //             mass: mod.mass
-            //         });
-            //     }
-            //     this.set("modifications", modifications);
-            // }
+        const self = this;
+        this.set("primaryScore", {score_name: "Match Score"});
+        // //saved config should end up including filter settings not just xiNET layout
+        // this.set("xiNETLayout", json.xiNETLayout);
 
-            //search meta data
-            const searches = new Map();
-            // for (let propertyName in json.searches) {
-            //     const search = json.searches[propertyName];
-            //     searches.set(propertyName, search);
-            // }
-            this.set("searches", searches);
 
-            // const getResiduesFromEnzymeDescription = function (regexMatch, residueSet) {
-            //     if (regexMatch && regexMatch.length > 1) {
-            //         const resArray = regexMatch[1].split(",");
-            //         const resCount = resArray.length;
-            //         for (let r = 0; r < resCount; r++) {
-            //             residueSet.add({
-            //                 aa: resArray[r],
-            //                 postConstraint: regexMatch[2] ? regexMatch[2].split(",") : null
-            //             });
-            //         }
-            //     }
-            // };
-
-            //enzyme specificity
-            // TODO _ seems like theres a duplication problem here if multiple searches are aggregated
-
-            //eliminate duplication first
-            // const enzymeDescriptions = new Set();
-            // for (let search of searches.values()) {
-            //     for (let enzyme of search.enzymes) {
-            //         enzymeDescriptions.add(enzyme.description);
-            //     }
-            // }
-            //
-            // const postAaSet = new Set();
-            // const aaConstrainedCTermSet = new Set();
-            // const aaConstrainedNTermSet = new Set();
-            //
-            // for (let enzymeDescription of enzymeDescriptions) {
-            //     const postAARegex = /PostAAConstrainedDigestion:DIGESTED:(.*?);ConstrainingAminoAcids:(.*?);/g;
-            //     const postAAMatch = postAARegex.exec(enzymeDescription);
-            //     getResiduesFromEnzymeDescription(postAAMatch, postAaSet);
-            //
-            //     const cTermRegex = /CTERMDIGEST:(.*?);/g;
-            //     const ctMatch = cTermRegex.exec(enzymeDescription);
-            //     getResiduesFromEnzymeDescription(ctMatch, aaConstrainedCTermSet);
-            //
-            //     const nTermRegex = /NTERMDIGEST:(.*?);/g;
-            //     const ntMatch = nTermRegex.exec(enzymeDescription);
-            //     getResiduesFromEnzymeDescription(ntMatch, aaConstrainedNTermSet);
-            // }
-            //
-            // const addEnzymeSpecificityResidues = function (residueSet, type) {
-            //     const resArray = Array.from(residueSet.values());
-            //     const resCount = resArray.length;
-            //     for (let r = 0; r < resCount; r++) {
-            //         enzymeSpecificity.push({
-            //             aa: resArray[r].aa,
-            //             type: type,
-            //             postConstraint: resArray[r].postConstraint
-            //         });
-            //     }
-            // };
-
-            const enzymeSpecificity = [];
-            // addEnzymeSpecificityResidues(postAaSet, "DIGESTIBLE"); //"Post AA constrained");
-            // addEnzymeSpecificityResidues(aaConstrainedCTermSet, "DIGESTIBLE"); // "AA constrained c-term");
-            // addEnzymeSpecificityResidues(aaConstrainedNTermSet, "DIGESTIBLE"); // "AA constrained n-term");
-            this.set("enzymeSpecificity", enzymeSpecificity);
-
-            //crosslink specificity
-            /*var linkableResSet = new Set();
-            for (var s = 0; s < searchCount; s++) {
-                var search = searchArray[s];
-                var crosslinkers = search.crosslinkers || [];
-                var crosslinkerCount = crosslinkers.length;
-                for (var cl = 0; cl < crosslinkerCount; cl++) {
-                    var crosslinkerDescription = crosslinkers[cl].description;
-                    var linkedAARegex = /LINKEDAMINOACIDS:(.*?)(?:;|$)/g;
-                    var result = null;
-                    while ((result = linkedAARegex.exec(crosslinkerDescription)) !== null) {
-                        var resArray = result[1].split(',');
-                        var resCount = resArray.length;
-                        for (var r = 0; r < resCount; r++) {
-                            var resRegex = /([A-Z])(.*)?/
-                            var resMatch = resRegex.exec(resArray[r]);
-                            if (resMatch) {
-                                linkableResSet.add(resMatch[1]);
+        const participants = this.get("participants");
+        const peptides = new Map();
+        // if (this.get("serverFlavour") === "PRIDE") {
+        if (!this.isAggregatedData()) {
+            if (this.proteins) {
+                for (let participant of this.proteins) {
+                    this.initProtein(participant, json);
+                    participants.set(participant.id, participant);
+                }
+            }
+            //peptides
+            if (this.peptides) {
+                for (let peptide of this.peptides) {
+                    SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
+                    peptide.sequence = peptide.base_seq;//seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
+                    peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
+                    for (var p = 0; p < peptide.prt.length; p++) {
+                        if (peptide.dec[p]) {
+                            const protein = participants.get(peptide.prt[p]);
+                            if (!protein) {
+                                console.error("Protein not found for peptide (not aggregated data)", peptide, peptide.prt[p]);
                             }
+                            protein.is_decoy = true;
+                            this.set("decoysPresent", true);
                         }
                     }
                 }
             }
-            this.set("crosslinkerSpecificity", CLMS.arrayFromMapValues(linkableResSet));*/
-
-            const linkableResSets = {};
-            for (let search of searches.values()) {
-                const crosslinkers = search.crosslinkers || [];
-
-                crosslinkers.forEach(function (crosslinker) {
-                    const crosslinkerDescription = crosslinker.description;
-                    const crosslinkerName = crosslinker.name;
-                    const linkedAARegex = /LINKEDAMINOACIDS:(.*?)(?:;|$)/g; // capture both sets if > 1 set
-                    // //console.log("cld", crosslinkerDescription);
-                    let resSet = linkableResSets[crosslinkerName];
-
-                    if (!resSet) {
-                        resSet = {
-                            searches: new Set(),
-                            linkables: [],
-                            name: crosslinkerName,
-                            id: +crosslinker.id
-                        };
-                        linkableResSets[crosslinkerName] = resSet;
-                    }
-                    resSet.searches.add(search.id);
-
-                    let result = null;
-                    let i = 0;
-                    while ((result = linkedAARegex.exec(crosslinkerDescription)) !== null) {
-                        if (!resSet.linkables[i]) {
-                            resSet.linkables[i] = new Set();
-                        }
-
-                        const resArray = result[1].split(",");
-                        resArray.forEach(function (res) {
-                            const resRegex = /(cterm|nterm|[A-Z])(.*)?/i;
-                            const resMatch = resRegex.exec(res);
-                            if (resMatch) {
-                                resSet.linkables[i].add(resMatch[1].toUpperCase());
-                            }
-                        });
-                        i++;
-                    }
-
-                    if (i === 0) {
-                        resSet.linkables.push(new Set(["*"]));  // in case non-covalent
-                    }
-
-                    resSet.heterobi = resSet.heterobi || (i > 1);
-                });
-            }
-
-            // //console.log("CROSS", linkableResSets);
-            // if (this.get("serverFlavour") === "XI2") { // hacky, crosslinker specificity not working in other systems
-            //     this.set("crosslinkerSpecificity", linkableResSets);
-            // }
-            //
-            // //saved config should end up including filter settings not just xiNET layout
-            // this.set("xiNETLayout", json.xiNETLayout);
-            const spectrumSources = new Map();
-            // if (this.get("serverFlavour") === "XI2") {
-            //     //spectrum sources
-            //     let specSource;
-            //     for (let propertyName in json.spectrumSources) {
-            //         specSource = json.spectrumSources[propertyName];
-            //         spectrumSources.set(+specSource.id, specSource.name);
-            //     }
-            //
-            //     //peak list files
-            //     const peakListFiles = new Map();
-            //     let plFile;
-            //     for (let propertyName in json.peakListFiles) {
-            //         plFile = json.peakListFiles[propertyName];
-            //         peakListFiles.set(+plFile.id, plFile.name);
-            //     }
-            //     this.set("peakListFiles", peakListFiles);
-            // } else if (this.get("serverFlavour") === "XIVIEW.ORG") {
-            //     //spectrum sources
-            //     var specSource;
-            //     var specCount = json.spectra.length;
-            //     for (var sp = 0; sp < specCount; sp++) {
-            //         specSource = json.spectra[sp];
-            //         spectrumSources.set(specSource.up_id + "_" + specSource.id, specSource);
-            //     }
-            // }
-            this.set("spectrumSources", spectrumSources);
-
-            const participants = this.get("participants");
-            const peptides = new Map();
-            // if (this.get("serverFlavour") === "PRIDE") {
-                if (!this.isAggregatedData()) {
-                    if (this.proteins) {
-                        for (let participant of this.proteins) {
-                            this.initProtein(participant, json);
-                            participants.set(participant.id, participant);
-                        }
-                    }
-                    //peptides
-                    if (this.peptides) {
-                        for (let peptide of this.peptides) {
-                            SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
-                            peptide.sequence = peptide.base_seq;//seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
-                            peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
-                            for (var p = 0; p < peptide.prt.length; p++) {
-                                if (peptide.dec[p]) {
-                                    const protein = participants.get(peptide.prt[p]);
-                                    if (!protein) {
-                                        console.error("Protein not found for peptide (not aggregated data)", peptide, peptide.prt[p]);
-                                    }
-                                    protein.is_decoy = true;
-                                    this.set("decoysPresent", true);
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    var tempParticipants = new Map();
-                    if (this.proteins) {
-                        for (let participant of json.proteins) {
-                            this.initProtein(participant, json);
-                            tempParticipants.set(participant.id, participant);
-                        }
-                    }
-                    //peptides
-                    if (this.peptides) {
-                        for (let peptide of this.peptides) {
-                            SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
-                            peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
-                            peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
-
-                            for (var p = 0; p < peptide.prt.length; p++) {
-                                const protein = tempParticipants.get(peptide.prt[p]);
-                                if (!protein) {
-                                    console.error("Protein not found for peptide (aggregated data)", peptide, peptide.prt[p]);
-                                }
-                                if (peptide.dec[p]) {
-                                    const decoyId = "DECOY_" + protein.accession;
-                                    protein.is_decoy = true;
-                                    protein.id = decoyId;
-                                    // how to get prot acc after id has been changed?
-                                    peptide.prt[p] = decoyId;
-                                    this.set("decoysPresent", true);
-                                } else {
-                                    // fix ids for target in aggregated data
-                                    protein.id = protein.accession;
-                                    peptide.prt[p] = protein.accession;
-
-                                }
-
-                            }
-                        }
-                    }
-
-                    for (let participant of tempParticipants.values()) {
-                        participants.set(participant.id, participant);
-                    }
-
+        } else {
+            var tempParticipants = new Map();
+            if (this.proteins) {
+                for (let participant of json.proteins) {
+                    this.initProtein(participant, json);
+                    tempParticipants.set(participant.id, participant);
                 }
-            // } else if (this.get("serverFlavour") === "XI2") {
-            //
-            //     if (json.proteins) {
-            //         for (let protein of json.proteins) {
-            //             this.initProtein(protein);
-            //             participants.set(protein.id, protein);
-            //         }
-            //     }
-            //
-            //     //peptides
-            //     if (json.peptides) {
-            //         const peptideArray = json.peptides;
-            //         const pepCount = peptideArray.length;
-            //         let peptide;
-            //         for (let pep = 0; pep < pepCount; pep++) {
-            //             SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
-            //             peptide = peptideArray[pep];
-            //             peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
-            //             peptides.set(peptide.search_id + "_" + peptide.id, peptide);
-            //         }
-            //     }
-            //
-            // } else if (this.get("serverFlavour") === "XIVIEW.ORG") {
-            //     var tempParticipants = new Map();
-            //
-            //     if (json.proteins) {
-            //         for (let participant of json.proteins) {
-            //             this.initProtein(participant, json);
-            //             tempParticipants.set(participant.id, participant);
-            //         }
-            //     }
-            //     //peptides
-            //     if (json.peptides) {
-            //         for (let peptide of json.peptides) {
-            //
-            //             SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
-            //             peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
-            //             peptides.set(peptide.u_id + "_" + peptide.id, peptide); // concat upload_id and peptide.id
-            //
-            //             for (var p = 0; p < peptide.prt.length; p++) {
-            //                 const protein = tempParticipants.get(peptide.prt[p]);
-            //                 if (!protein) {
-            //                     console.error("Protein not found for peptide (aggregated data)", peptide, peptide.prt[p]);
-            //                 }
-            //                 if (peptide.is_decoy[p]) {
-            //                     const decoyId = "DECOY_" + protein.accession;
-            //                     protein.is_decoy = true;
-            //                     protein.id = decoyId;
-            //                     // how to get prot acc after id has been changed?
-            //                     peptide.prt[p] = decoyId;
-            //                     this.set("decoysPresent", true);
-            //                 } else {
-            //                     // fix ids for target in aggregated data
-            //                     protein.id = protein.accession;
-            //                     peptide.prt[p] = protein.accession;
-            //
-            //                 }
-            //
-            //             }
-            //         }
-            //     }
-            //
-            //     for (let participant of tempParticipants.values()) {
-            //         participants.set(participant.id, participant);
-            //     }
-            // }
+            }
+            //peptides
+            if (this.peptides) {
+                for (let peptide of this.peptides) {
+                    SearchResultsModel.commonRegexes.notUpperCase.lastIndex = 0;
+                    peptide.sequence = peptide.seq_mods.replace(SearchResultsModel.commonRegexes.notUpperCase, "");
+                    peptides.set(peptide.u_id + "_" + peptide.id, new Peptide(peptide)); // concat upload_id and peptide.id
 
-            this.initDecoyLookup();
+                    for (var p = 0; p < peptide.prt.length; p++) {
+                        const protein = tempParticipants.get(peptide.prt[p]);
+                        if (!protein) {
+                            console.error("Protein not found for peptide (aggregated data)", peptide, peptide.prt[p]);
+                        }
+                        if (peptide.dec[p]) {
+                            const decoyId = "DECOY_" + protein.accession;
+                            protein.is_decoy = true;
+                            protein.id = decoyId;
+                            // how to get prot acc after id has been changed?
+                            peptide.prt[p] = decoyId;
+                            this.set("decoysPresent", true);
+                        } else {
+                            // fix ids for target in aggregated data
+                            protein.id = protein.accession;
+                            peptide.prt[p] = protein.accession;
 
-            const crosslinks = this.get("crosslinks");
+                        }
 
-            let minScore = undefined;
-            let maxScore = undefined;
-
-            // moved from modelUtils 05/08/19
-            // Connect searches to proteins, and add the protein set as a property of a search in the clmsModel, MJG 17/05/17
-            var searchMap = this.getProteinSearchMap(this.peptides, this.matches);
-            this.get("searches").forEach(function (value, key) {
-                value.participantIDSet = searchMap[key];
-            });
-
-            if (this.matches) {
-                var matches = this.get("matches");
-
-                var l = this.matches.length;
-                for (var i = 0; i < l; i++) {
-                    let match;
-                    // if (this.get("serverFlavour") === "PRIDE") {
-                        match = new PrideSpectrumMatch(this, participants, crosslinks, peptides, this.matches[i]);
-                    // } else if (this.get("serverFlavour") === "XI2") {
-                    //     match = new Xi2SpectrumMatch(this, participants, crosslinks, peptides, json.matches[i]);
-                    // } else if (this.get("serverFlavour") === "XIVIEW.ORG") {
-                    //     match = new OldSpectrumMatch(this, participants, crosslinks, peptides, json.matches[i]);
-                    // }
-                    matches.push(match);
-
-                    if (maxScore === undefined || match.score() > maxScore) {
-                        maxScore = match.score();
-                    } else if (minScore === undefined || match.score() < minScore) {
-                        minScore = match.score();
                     }
                 }
             }
 
-            console.log("score sets:", this.get("scoreSets"));
+            for (let participant of tempParticipants.values()) {
+                participants.set(participant.id, participant);
+            }
 
-            this.set("minScore", minScore);
-            this.set("maxScore", maxScore);
+        }
 
-            const participantArray = Array.from(participants.values());
-            // only count real participants towards participant count (which is used as cut-off further on)
-            const targetParticipantArray = participantArray.filter(function (p) {
-                return !p.is_decoy;
-            });
 
-            // for (let participant of targetParticipantArray) {
-            //     participant.uniprot = json.interactors ? json.interactors[participant.accession.split("-")[0]] : null;
-            // }
+        this.initDecoyLookup();
 
-            // window.vent.trigger("uniprotDataParsed", self);
+        const crosslinks = this.get("crosslinks");
+
+        let minScore = undefined;
+        let maxScore = undefined;
+
+        // moved from modelUtils 05/08/19
+        // Connect searches to proteins, and add the protein set as a property of a search in the clmsModel, MJG 17/05/17
+        var searchMap = this.getProteinSearchMap(this.peptides, this.matches);
+        this.get("searches").forEach(function (value, key) {
+            value.participantIDSet = searchMap[key];
+        });
+
+        if (this.matches) {
+            var matches = this.get("matches");
+
+            var l = this.matches.length;
+            for (var i = 0; i < l; i++) {
+                let match;
+                match = new PrideSpectrumMatch(this, participants, crosslinks, peptides, this.matches[i]);
+                matches.push(match);
+
+                if (maxScore === undefined || match.score() > maxScore) {
+                    maxScore = match.score();
+                } else if (minScore === undefined || match.score() < minScore) {
+                    minScore = match.score();
+                }
+            }
+        }
+
+        console.log("score sets:", this.get("scoreSets"));
+
+        this.set("minScore", minScore);
+        this.set("maxScore", maxScore);
+
+        const participantArray = Array.from(participants.values());
+        // only count real participants towards participant count (which is used as cut-off further on)
+        const targetParticipantArray = participantArray.filter(function (p) {
+            return !p.is_decoy;
+        });
+
+        // for (let participant of targetParticipantArray) {
+        //     participant.uniprot = json.interactors ? json.interactors[participant.accession.split("-")[0]] : null;
         // }
+
+        // window.vent.trigger("uniprotDataParsed", self);
+
 
     }
 
@@ -468,8 +395,7 @@ export class SearchResultsModel extends Backbone.Model {
                     // check server flavour -- problems ere to do with xi2
                     if (self.get("serverFlavour") === "XI2") {
                         searchId = rawMatch.datasetId;
-                    }
-                    else {
+                    } else {
                         searchId = rawMatch.si;
                     }
                     let searchToProts = searchMap[searchId];
@@ -494,7 +420,7 @@ export class SearchResultsModel extends Backbone.Model {
         }
         // check serverFlavour
         // if (this.get("serverFlavour") === "PRIDE") {
-            protObj.is_decoy = false;
+        protObj.is_decoy = false;
         // }
         // else if (this.get("serverFlavour") === "XIVIEW.ORG") {
         //     protObj.is_decoy = false;
@@ -514,7 +440,7 @@ export class SearchResultsModel extends Backbone.Model {
 
         protObj.form = 0;
 
-        if ((!protObj.name || protObj.name.trim() === '{"","protein description"}') && protObj.accession){
+        if ((!protObj.name || protObj.name.trim() === '{"","protein description"}') && protObj.accession) {
             protObj.name = protObj.accession;
         }
         protObj.getMeta = function (metaField) {
